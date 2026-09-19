@@ -1,7 +1,5 @@
 <div align="center">
 
-![PandaHub Banner](./docs/banner.png)
-
 # Panda<span>Hub</span>
 
 **游戏开黑调度平台 · Game Lodge**
