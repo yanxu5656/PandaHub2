@@ -28,44 +28,44 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-bg-primary">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-accent/15 flex items-center justify-center mx-auto mb-4">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent">
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 rounded-2xl bg-accent/15 flex items-center justify-center mx-auto mb-5">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent">
               <circle cx="12" cy="12" r="10" />
               <circle cx="9" cy="10" r="1.5" fill="currentColor" />
               <circle cx="15" cy="10" r="1.5" fill="currentColor" />
               <ellipse cx="12" cy="14" rx="3" ry="2" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold">PandaHub</h1>
-          <p className="text-text-secondary text-sm mt-1">登录你的账号</p>
+          <h1 className="text-3xl font-semibold">PandaHub</h1>
+          <p className="text-text-secondary text-[15px] mt-2">登录你的账号</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="px-4 py-3 rounded-md bg-danger-dim text-danger text-sm">{error}</div>
+            <div className="px-4 py-3 rounded-lg bg-danger-dim text-danger text-[15px]">{error}</div>
           )}
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1.5">邮箱</label>
+            <label className="block text-[15px] text-text-secondary mb-2">邮箱</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2.5 rounded-md bg-bg-card border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
+              className="w-full px-4 py-3 rounded-lg bg-bg-card border border-border text-[15px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
               placeholder="your@email.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1.5">密码</label>
+            <label className="block text-[15px] text-text-secondary mb-2">密码</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2.5 rounded-md bg-bg-card border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
+              className="w-full px-4 py-3 rounded-lg bg-bg-card border border-border text-[15px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
               placeholder="••••••••"
             />
           </div>
@@ -73,13 +73,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-md bg-accent text-bg-primary text-sm font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-lg bg-accent text-bg-primary text-[15px] font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
             {loading ? '登录中...' : '登录'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-text-secondary mt-6">
+        <p className="text-center text-[15px] text-text-secondary mt-8">
           没有账号？{' '}
           <Link to="/register" className="text-accent hover:text-accent-hover transition-colors">
             注册

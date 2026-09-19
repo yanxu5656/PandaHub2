@@ -46,13 +46,13 @@ export default function VoteDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-center text-text-muted text-sm">加载中...</div>
+      <div className="p-10 text-center text-text-muted text-base">加载中...</div>
     )
   }
 
   if (!vote) {
     return (
-      <div className="p-8 text-center text-text-muted text-sm">投票不存在</div>
+      <div className="p-10 text-center text-text-muted text-base">投票不存在</div>
     )
   }
 
@@ -64,19 +64,19 @@ export default function VoteDetailPage() {
   const optionCounts = vote.options.map((_, i) => records.filter(r => r.option_index === i).length)
 
   return (
-    <div className="p-4 lg:p-8 max-w-3xl mx-auto">
+    <div className="p-4 lg:p-10 max-w-3xl mx-auto">
       <button
         onClick={() => navigate('/votes')}
-        className="text-sm text-text-secondary hover:text-text-primary mb-4 transition-colors flex items-center gap-1"
+        className="text-[15px] text-text-secondary hover:text-text-primary mb-6 transition-colors flex items-center gap-1.5"
       >
         ← 返回投票列表
       </button>
 
       <Card>
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-xl font-semibold">{vote.title}</h1>
-            <p className="text-sm text-text-muted mt-1">
+            <h1 className="text-3xl font-semibold">{vote.title}</h1>
+            <p className="text-[15px] text-text-muted mt-2">
               {vote.creator?.nickname} 发起 · {new Date(vote.created_at).toLocaleDateString('zh-CN')}
               {vote.expires_at && (
                 <span className={isExpired ? 'text-danger' : ''}>
@@ -86,8 +86,8 @@ export default function VoteDetailPage() {
               )}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`px-2.5 py-1 rounded text-xs font-medium ${
+          <div className="flex items-center gap-3">
+            <span className={`px-3 py-1.5 rounded-lg text-[13px] font-medium ${
               vote.status === 'active'
                 ? isExpired ? 'bg-danger-dim text-danger' : 'bg-success/15 text-success'
                 : 'bg-bg-hover text-text-muted'
@@ -112,29 +112,29 @@ export default function VoteDetailPage() {
                 {isVotable ? (
                   <button
                     onClick={() => handleVote(i)}
-                    className="w-full text-left px-4 py-3 rounded-md border border-border hover:border-accent hover:bg-accent-dim/30 transition-colors group"
+                    className="w-full text-left px-5 py-4 rounded-xl border border-border hover:border-accent hover:bg-accent-dim/30 transition-colors group"
                   >
                     <div className="flex items-center justify-between relative z-10">
-                      <span className="text-sm font-medium group-hover:text-accent transition-colors">{opt.text}</span>
-                      <svg className="w-4 h-4 text-text-muted group-hover:text-accent transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <span className="text-[15px] font-medium group-hover:text-accent transition-colors">{opt.text}</span>
+                      <svg className="w-5 h-5 text-text-muted group-hover:text-accent transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="10" />
                       </svg>
                     </div>
                   </button>
                 ) : (
-                  <div className={`px-4 py-3 rounded-md border transition-colors ${
+                  <div className={`px-5 py-4 rounded-xl border transition-colors ${
                     isMyVote ? 'border-accent bg-accent-dim/20' : 'border-border'
                   }`}>
                     <div className="flex items-center justify-between mb-2 relative z-10">
-                      <span className="text-sm font-medium">{opt.text}</span>
+                      <span className="text-[15px] font-medium">{opt.text}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-text-muted">{count} 票</span>
-                        <span className="text-xs font-medium text-text-secondary">{percent}%</span>
+                        <span className="text-[13px] text-text-muted">{count} 票</span>
+                        <span className="text-[13px] font-medium text-text-secondary">{percent}%</span>
                       </div>
                     </div>
-                    <div className="absolute inset-0 flex items-center px-4 pointer-events-none">
+                    <div className="absolute inset-0 flex items-center px-5 pointer-events-none">
                       <div
-                        className={`h-6 rounded ${isMyVote ? 'bg-accent/15' : 'bg-bg-hover'}`}
+                        className={`h-7 rounded-lg ${isMyVote ? 'bg-accent/15' : 'bg-bg-hover'}`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -146,18 +146,17 @@ export default function VoteDetailPage() {
         </div>
 
         {myRecord && (
-          <p className="text-xs text-text-muted mt-4">
+          <p className="text-[13px] text-text-muted mt-5">
             你投了「{vote.options[myRecord.option_index]?.text}」
           </p>
         )}
 
-        {/* Voters list */}
         {records.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-border">
-            <p className="text-xs text-text-muted mb-2">投票记录 ({records.length})</p>
+          <div className="mt-8 pt-5 border-t border-border">
+            <p className="text-[13px] text-text-muted mb-3">投票记录 ({records.length})</p>
             <div className="flex flex-wrap gap-2">
               {records.map(r => (
-                <span key={r.id} className="px-2.5 py-1 rounded bg-bg-hover text-xs text-text-secondary">
+                <span key={r.id} className="px-3 py-1.5 rounded-lg bg-bg-hover text-[13px] text-text-secondary">
                   {r.user?.nickname ?? '未知'} → {vote.options[r.option_index]?.text}
                 </span>
               ))}

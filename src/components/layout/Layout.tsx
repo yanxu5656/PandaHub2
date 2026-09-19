@@ -81,25 +81,29 @@ export default function Layout() {
     closeSidebar()
   }, [location.pathname])
 
+  const userAvatar = user?.user_metadata?.avatar_url
+  const userIsEmoji = userAvatar && !userAvatar.startsWith('http')
+  const userInitial = user?.user_metadata?.nickname?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? '?'
+
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-border shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent">
+      <div className="h-16 flex items-center px-6 border-b border-border shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent">
               <circle cx="12" cy="12" r="10" />
               <circle cx="9" cy="10" r="1.5" fill="currentColor" />
               <circle cx="15" cy="10" r="1.5" fill="currentColor" />
               <ellipse cx="12" cy="14" rx="3" ry="2" />
             </svg>
           </div>
-          <span className="text-sm font-semibold tracking-wide">PandaHub</span>
+          <span className="text-base font-semibold tracking-wide">PandaHub</span>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-auto">
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -107,9 +111,9 @@ export default function Layout() {
             end={item.path === '/'}
             onClick={closeSidebar}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+              `flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] transition-all ${
                 isActive
-                  ? 'bg-accent-dim text-accent font-medium'
+                  ? 'bg-accent-dim text-accent font-semibold'
                   : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
               }`
             }
@@ -121,21 +125,25 @@ export default function Layout() {
       </nav>
 
       {/* User */}
-      <div className="p-3 border-t border-border shrink-0">
+      <div className="p-4 border-t border-border shrink-0">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-bg-hover flex items-center justify-center text-xs font-medium text-text-secondary">
-            {user?.email?.[0]?.toUpperCase() ?? '?'}
+          <div className="w-10 h-10 rounded-full bg-bg-hover flex items-center justify-center shrink-0">
+            {userIsEmoji ? (
+              <span className="text-xl leading-none">{userAvatar}</span>
+            ) : (
+              <span className="text-sm font-medium text-text-secondary">{userInitial}</span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.user_metadata?.nickname ?? user?.email?.split('@')[0] ?? '用户'}</p>
+            <p className="text-[15px] font-medium truncate">{user?.user_metadata?.nickname ?? user?.email?.split('@')[0] ?? '用户'}</p>
             <p className="text-xs text-text-muted truncate">{user?.email}</p>
           </div>
           <button
             onClick={signOut}
-            className="p-1.5 rounded-md text-text-muted hover:text-danger hover:bg-danger-dim transition-colors"
+            className="p-2 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors"
             title="退出登录"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
@@ -149,7 +157,7 @@ export default function Layout() {
   return (
     <div className="flex h-screen">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-56 bg-bg-secondary border-r border-border flex-col shrink-0">
+      <aside className="hidden lg:flex w-60 bg-bg-secondary border-r border-border flex-col shrink-0">
         {sidebarContent}
       </aside>
 
@@ -163,7 +171,7 @@ export default function Layout() {
 
       {/* Mobile sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-56 bg-bg-secondary border-r border-border flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-60 bg-bg-secondary border-r border-border flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -173,18 +181,18 @@ export default function Layout() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
-        <div className="lg:hidden h-12 flex items-center px-4 border-b border-border bg-bg-secondary shrink-0">
+        <div className="lg:hidden h-14 flex items-center px-4 border-b border-border bg-bg-secondary shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-1.5 -ml-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors"
+            className="p-2 -ml-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <span className="ml-3 text-sm font-semibold">PandaHub</span>
+          <span className="ml-3 text-base font-semibold">PandaHub</span>
         </div>
 
         <main className="flex-1 overflow-auto">
