@@ -192,37 +192,43 @@ export default function SchedulePage() {
   }, [overlapCount, allSchedules, profiles, user?.id])
 
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold">时间协调</h1>
-        <p className="text-text-secondary text-base mt-2">拖拽选择多个时间段，绿色越深表示越多人在这个时间段有空</p>
+    <div className="p-6 lg:p-12 max-w-7xl mx-auto">
+      <div className="mb-8 animate-fade-up">
+        <p className="eyebrow mb-3">Schedule</p>
+        <h1 className="text-4xl font-semibold tracking-tight">时间协调</h1>
+        <p className="text-text-secondary text-base mt-2">拖拽选择多个时间段，金色越深表示越多人在这个时间段有空</p>
       </div>
 
       {/* Week navigation */}
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={() => setWeekOffset(w => w - 1)}
-          className="px-5 py-2.5 rounded-xl border border-border text-[15px] text-text-secondary hover:bg-bg-hover transition-colors"
-        >
-          ← 上周
-        </button>
-        <button
-          onClick={() => setWeekOffset(0)}
-          className="px-5 py-2.5 rounded-xl text-[15px] font-medium bg-accent-dim text-accent hover:bg-accent/20 transition-colors"
-        >
-          本周
-        </button>
-        <button
-          onClick={() => setWeekOffset(w => w + 1)}
-          className="px-5 py-2.5 rounded-xl border border-border text-[15px] text-text-secondary hover:bg-bg-hover transition-colors"
-        >
-          下周 →
-        </button>
-        <span className="ml-3 text-base text-text-secondary">
-          {weekDates[0].label} — {weekDates[6].label}
+      <div className="flex flex-wrap items-center gap-4 mb-8 animate-fade-up" style={{ animationDelay: '80ms' }}>
+        <div className="surface rounded-xl p-1.5 flex items-center gap-1">
+          <button
+            onClick={() => setWeekOffset(w => w - 1)}
+            className="px-4 py-2 rounded-lg text-[15px] text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
+          >
+            ← 上周
+          </button>
+          <button
+            onClick={() => setWeekOffset(0)}
+            className="px-4 py-2 rounded-lg text-[15px] font-medium bg-accent-dim text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+          >
+            本周
+          </button>
+          <button
+            onClick={() => setWeekOffset(w => w + 1)}
+            className="px-4 py-2 rounded-lg text-[15px] text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
+          >
+            下周 →
+          </button>
+        </div>
+        <span className="ml-2 font-display text-xl italic text-text-secondary">
+          <span className="gold-text not-italic num">{weekDates[0].label}</span>
+          <span className="text-text-muted mx-2 not-italic">—</span>
+          <span className="gold-text not-italic num">{weekDates[6].label}</span>
         </span>
       </div>
 
+      <div className="animate-fade-up" style={{ animationDelay: '160ms' }}>
       <Card className="overflow-hidden !p-0">
         {isLoading ? (
           <div className="p-10 text-center text-text-muted text-base">加载中...</div>
@@ -231,18 +237,18 @@ export default function SchedulePage() {
             <table className="w-full border-collapse min-w-[700px] select-none">
               <thead>
                 <tr>
-                  <th className="w-20 px-4 py-4 text-sm font-medium text-text-muted border-b border-border bg-bg-secondary text-left sticky left-0 z-10">
+                  <th className="w-20 px-4 py-4 text-xs font-medium tracking-widest uppercase text-text-muted border-b border-hairline bg-[#101014] text-left sticky left-0 z-10">
                     时间
                   </th>
                   {DAY_NAMES.map((name, i) => (
                     <th
                       key={i}
-                      className={`px-3 py-4 text-sm font-medium border-b border-border bg-bg-secondary text-center ${
-                        isWeekend(i) ? 'text-accent' : ''
+                      className={`px-3 py-4 text-sm font-medium border-b border-hairline bg-[#101014] text-center ${
+                        isWeekend(i) ? 'text-accent' : 'text-text-secondary'
                       } ${isToday(weekDates[i].date) ? 'bg-accent-dim' : ''}`}
                     >
                       <div>{name}</div>
-                      <div className="text-text-muted font-normal mt-1 text-xs">{weekDates[i].label}</div>
+                      <div className="text-text-muted font-normal mt-1 text-xs num">{weekDates[i].label}</div>
                     </th>
                   ))}
                 </tr>
@@ -250,7 +256,7 @@ export default function SchedulePage() {
               <tbody>
                 {HOURS.map(hour => (
                   <tr key={hour}>
-                    <td className="px-4 py-2 text-sm text-text-muted border-b border-border/50 bg-bg-secondary sticky left-0 z-10 font-mono">
+                    <td className="px-4 py-2 text-sm text-text-muted border-b border-hairline bg-[#101014] sticky left-0 z-10 num">
                       {String(hour).padStart(2, '0')}:00
                     </td>
                     {DAY_NAMES.map((_, day) => {
@@ -260,33 +266,33 @@ export default function SchedulePage() {
                       const intensity = totalMembers > 0 ? count / totalMembers : 0
                       const avatars = getSlotAvatars(key, allSchedules ?? [], profiles ?? [], user?.id)
 
-                      let bgClass = 'bg-bg-card'
+                      let bgClass = 'bg-bg-card/60'
                       if (isMine) {
-                        if (intensity >= 0.75) bgClass = 'bg-success/30'
-                        else if (intensity >= 0.5) bgClass = 'bg-success/20'
-                        else if (intensity >= 0.25) bgClass = 'bg-success/12'
-                        else bgClass = 'bg-success/8'
+                        if (intensity >= 0.75) bgClass = 'bg-accent/40'
+                        else if (intensity >= 0.5) bgClass = 'bg-accent/28'
+                        else if (intensity >= 0.25) bgClass = 'bg-accent/16'
+                        else bgClass = 'bg-accent/8'
                       }
 
                       return (
-                        <td key={day} className="border-b border-border/50 p-1">
+                        <td key={day} className="border-b border-hairline p-1">
                           <button
                             onMouseDown={() => handleMouseDown(day, hour)}
-                            onMouseEnter={() => handleMouseEnter(day, hour)}
-                            className={`w-full h-12 rounded-lg transition-all duration-150 flex items-center justify-center gap-0.5 ${bgClass} ${
+                            onMouseOver={() => handleMouseEnter(day, hour)}
+                            className={`w-full h-12 rounded-lg transition-all duration-150 cursor-pointer flex items-center justify-center gap-0.5 ${bgClass} ${
                               isMine
-                                ? 'hover:bg-success/40 ring-1 ring-success/30'
+                                ? 'hover:brightness-125 ring-1 ring-accent/35'
                                 : 'hover:bg-bg-hover'
                             }`}
                             title={`${DAY_NAMES[day]} ${hour}:00 — ${isMine ? '有空' : '没空'}${count > 0 ? `，${count} 人有空` : ''}`}
                           >
                             {avatars.length > 0 && avatars.length <= 3 && (
-                              <span className="text-xs text-text-muted">
+                              <span className={`text-xs ${isMine ? 'text-text-primary' : 'text-text-muted'}`}>
                                 {avatars.map(a => a.avatar).join('')}
                               </span>
                             )}
                             {avatars.length > 3 && (
-                              <span className="text-xs text-text-muted">
+                              <span className={`text-xs ${isMine ? 'text-text-primary' : 'text-text-muted'}`}>
                                 {avatars[0].avatar}+{avatars.length - 1}
                               </span>
                             )}
@@ -301,57 +307,57 @@ export default function SchedulePage() {
           </div>
         )}
       </Card>
+      </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-6 mt-6 text-sm text-text-muted">
+      <div className="flex flex-wrap items-center gap-6 mt-6 text-sm text-text-muted">
         <span>拖拽选择多个时间段</span>
         <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded bg-success/8" /> 仅我有空
+          <span className="w-4 h-4 rounded bg-accent/8 ring-1 ring-accent/20" /> 仅我有空
         </span>
         <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded bg-success/20" /> 多人有空
+          <span className="w-4 h-4 rounded bg-accent/28" /> 多人有空
         </span>
         <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded bg-success/30" /> 大部分人有空
+          <span className="w-4 h-4 rounded bg-accent/40" /> 大部分人有空
         </span>
       </div>
 
       {/* Common times summary */}
-      <Card className="mt-8">
-        <h3 className="text-lg font-semibold mb-4">大家能一起玩的时间</h3>
+      <Card className="mt-8" eyebrow="Common Hours" title="大家能一起玩的时间">
         {commonTimes.length === 0 ? (
           <p className="text-base text-text-muted text-center py-6">
             还没有重叠的时间段 —— 在上方表格中点选或拖选你有空的时间后，这里会自动列出大家共同有空的时段
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-1">
             {commonTimes.map((t, i) => {
               const everyone = totalProfiles > 1 && t.people.length >= totalProfiles
               return (
-                <div key={i} className="flex flex-wrap items-center gap-4 py-3 border-b border-border last:border-0">
-                  <span className="text-[15px] font-medium w-32 shrink-0">
-                    {DAY_NAMES[t.day]} {String(t.startHour).padStart(2, '0')}:00–{String(t.endHour + 1).padStart(2, '0')}:00
+                <div key={i} className="flex flex-wrap items-center gap-4 py-3.5 border-b border-hairline last:border-0">
+                  <span className="text-[15px] font-medium w-36 shrink-0">
+                    {DAY_NAMES[t.day]} <span className="num text-text-secondary">{String(t.startHour).padStart(2, '0')}:00–{String(t.endHour + 1).padStart(2, '0')}:00</span>
                   </span>
                   {everyone && (
-                    <span className="px-2.5 py-1 rounded-lg text-xs bg-success/15 text-success font-medium shrink-0">全员可到</span>
+                    <span className="px-2.5 py-1 rounded-lg text-xs bg-accent-dim text-accent font-medium shrink-0">全员可到</span>
                   )}
-                  <div className="h-2.5 rounded-full bg-bg-hover flex-1 min-w-[80px] overflow-hidden">
+                  <div className="h-2 rounded-full bg-bg-hover flex-1 min-w-[80px] overflow-hidden">
                     <div
-                      className="h-full bg-success rounded-full"
+                      className="h-full rounded-full bg-linear-to-r from-accent-deep to-accent-hover"
                       style={{ width: `${totalProfiles > 0 ? (t.people.length / totalProfiles) * 100 : 0}%` }}
                     />
                   </div>
-                  <span className="text-sm text-text-secondary w-16 text-right shrink-0">
+                  <span className="text-sm text-text-secondary w-16 text-right shrink-0 num">
                     {t.people.length}/{totalProfiles} 人
                   </span>
                   <div className="flex gap-1.5 flex-wrap">
                     {t.people.slice(0, 5).map((name, j) => (
-                      <span key={j} className="px-2.5 py-1 rounded-lg bg-bg-hover text-sm text-text-secondary">
+                      <span key={j} className="px-2.5 py-1 rounded-lg bg-bg-hover/80 border border-hairline text-sm text-text-secondary">
                         {name}
                       </span>
                     ))}
                     {t.people.length > 5 && (
-                      <span className="text-sm text-text-muted">+{t.people.length - 5}</span>
+                      <span className="text-sm text-text-muted self-center">+{t.people.length - 5}</span>
                     )}
                   </div>
                 </div>

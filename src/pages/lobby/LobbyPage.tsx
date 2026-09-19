@@ -18,10 +18,10 @@ import {
 } from '@/lib/services'
 
 const quickActions = [
-  { label: '填写本周时间', path: '/schedule', icon: CalendarIcon, color: 'text-blue-400' },
-  { label: '发起投票', path: '/votes', icon: VoteIcon, color: 'text-purple-400' },
-  { label: '管理游戏库', path: '/games', icon: GamesIcon, color: 'text-green-400' },
-  { label: '玩小游戏', path: '/minigames', icon: MiniGameIcon, color: 'text-orange-400' },
+  { label: '填写本周时间', path: '/schedule', icon: CalendarIcon, color: 'text-blue-300' },
+  { label: '发起投票', path: '/votes', icon: VoteIcon, color: 'text-purple-300' },
+  { label: '管理游戏库', path: '/games', icon: GamesIcon, color: 'text-emerald-300' },
+  { label: '玩小游戏', path: '/minigames', icon: MiniGameIcon, color: 'text-orange-300' },
 ]
 
 function CalendarIcon() {
@@ -54,18 +54,27 @@ function MiniGameIcon() {
   )
 }
 
+function greeting() {
+  const h = new Date().getHours()
+  if (h < 5) return { zh: '夜深了', en: 'Late night' }
+  if (h < 11) return { zh: '早上好', en: 'Good morning' }
+  if (h < 14) return { zh: '中午好', en: 'Good noon' }
+  if (h < 18) return { zh: '下午好', en: 'Good afternoon' }
+  return { zh: '晚上好', en: 'Good evening' }
+}
+
 function Avatar({ profile, size = 'md' }: { profile: Profile; size?: 'sm' | 'md' | 'lg' }) {
   const sizeClass = size === 'sm' ? 'w-8 h-8 text-sm' : size === 'lg' ? 'w-12 h-12 text-xl' : 'w-10 h-10 text-base'
   const isEmoji = profile.avatar_url && !profile.avatar_url.startsWith('http')
   const initials = (profile.nickname || '?').slice(0, 1)
   return (
-    <div className={`${sizeClass} rounded-full bg-bg-hover flex items-center justify-center font-medium text-text-secondary shrink-0`}>
+    <div className={`${sizeClass} rounded-full bg-bg-hover ring-1 ring-hairline flex items-center justify-center font-medium text-text-secondary shrink-0`}>
       {isEmoji ? (
         <span className="leading-none">{profile.avatar_url}</span>
       ) : profile.avatar_url ? (
         <img src={profile.avatar_url} alt={profile.nickname} className="w-full h-full rounded-full object-cover" />
       ) : (
-        initials
+        <span className="text-accent">{initials}</span>
       )}
     </div>
   )
@@ -77,39 +86,62 @@ function MemberRow({ profile, isOnline }: { profile: Profile; isOnline: boolean 
   const isMe = profile.id === user?.id
 
   return (
-    <div className="flex items-center gap-4 py-3">
-      <Avatar profile={profile} />
+    <div className="flex items-center gap-4 py-3.5 group">
+      <div className="relative shrink-0">
+        <Avatar profile={profile} />
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#15151a] ${isOnline ? 'bg-success' : 'bg-border-light'}`}
+          title={isOnline ? '在线' : '离线'}
+        />
+      </div>
       <div className="flex-1 min-w-0">
         <p className="text-[15px] font-medium truncate">
           {profile.nickname}
           {isMe && <span className="text-text-muted ml-2 text-sm font-normal">(我)</span>}
         </p>
+        <p className="text-xs text-text-muted mt-0.5">{isOnline ? '在线' : '离线'}</p>
       </div>
       {isAdmin && (
         <span className="px-2.5 py-1 rounded-lg text-xs bg-accent-dim text-accent font-medium">管理员</span>
       )}
-      <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-success' : 'bg-border'}`} />
     </div>
   )
 }
 
 function NotificationItem({ notification }: { notification: Notification }) {
   return (
-    <div className="py-4 border-b border-border last:border-0">
-      <p className="text-[15px] text-text-primary leading-relaxed">{notification.content}</p>
-      <p className="text-sm text-text-muted mt-2">{new Date(notification.created_at).toLocaleDateString('zh-CN')}</p>
+    <div className="relative py-4 pl-5 pr-2 border-b border-hairline last:border-0">
+      {!notification.is_read && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-linear-to-b from-accent-hover to-accent-deep" />
+      )}
+      <p className={`leading-relaxed ${notification.is_read ? 'text-text-secondary' : 'text-text-primary font-medium'} text-[15px]`}>
+        {notification.content}
+      </p>
+      <p className="text-sm text-text-muted mt-1.5 num">{new Date(notification.created_at).toLocaleDateString('zh-CN')}</p>
     </div>
   )
 }
 
 function ActiveVoteCard({ vote }: { vote: Vote }) {
   return (
-    <Link to={`/votes/${vote.id}`} className="block py-4 border-b border-border last:border-0 hover:bg-bg-hover/50 px-2 rounded-lg transition-colors">
-      <p className="text-[15px] font-medium">{vote.title}</p>
+    <Link to={`/votes/${vote.id}`} className="block py-4 border-b border-hairline last:border-0 hover:bg-bg-hover/40 px-2 rounded-lg transition-colors group">
+      <p className="text-[15px] font-medium group-hover:text-accent transition-colors">{vote.title}</p>
       <p className="text-sm text-text-muted mt-1.5">
         {vote.creator?.nickname} 发起 · {new Date(vote.created_at).toLocaleDateString('zh-CN')}
       </p>
     </Link>
+  )
+}
+
+function StatTile({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+  return (
+    <div className="surface rounded-xl px-5 py-4 flex items-center gap-4">
+      <span className={`font-display text-4xl leading-none num ${accent ? 'gold-text italic' : ''}`}>{value}</span>
+      <div>
+        <p className="eyebrow">{label}</p>
+        <p className="text-sm text-text-secondary mt-1">{label === '在线' ? '人在线' : label === '成员' ? '位成员' : label === '进行中投票' ? '个投票进行中' : '条未读通知'}</p>
+      </div>
+    </div>
   )
 }
 
@@ -160,23 +192,47 @@ export default function LobbyPage() {
     await markAllNotificationsRead()
   }
 
+  const g = greeting()
+  const nickname = user?.user_metadata?.nickname ?? '朋友'
+  const now = new Date()
+  const dateLine = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 · ${['周日', '周一', '周二', '周三', '周四', '周五', '周六'][now.getDay()]}`
+
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-semibold">大厅</h1>
-        <p className="text-text-secondary text-base mt-2">欢迎回来，{user?.user_metadata?.nickname ?? '朋友'}</p>
+    <div className="p-6 lg:p-12 max-w-7xl mx-auto">
+      {/* Editorial header */}
+      <header className="mb-10 animate-fade-up">
+        <p className="eyebrow mb-3">{g.en} · {dateLine}</p>
+        <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+          {g.zh}，<span className="gold-text font-display text-5xl lg:text-6xl italic tracking-normal">{nickname}</span>
+        </h1>
+        <p className="text-text-secondary text-base mt-3">今晚谁来集结？先看时间、再投票、然后开玩。</p>
+      </header>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-10">
+        <div className="animate-fade-up" style={{ animationDelay: '60ms' }}>
+          <StatTile label="在线" value={onlineIds?.length ?? 0} accent />
+        </div>
+        <div className="animate-fade-up" style={{ animationDelay: '120ms' }}>
+          <StatTile label="成员" value={profiles?.length ?? 0} />
+        </div>
+        <div className="animate-fade-up" style={{ animationDelay: '180ms' }}>
+          <StatTile label="进行中投票" value={activeVotes?.length ?? 0} />
+        </div>
+        <div className="animate-fade-up" style={{ animationDelay: '240ms' }}>
+          <StatTile label="未读通知" value={unreadCount} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Left column — Members + Notifications */}
-        <div className="lg:col-span-3 space-y-8">
-          {/* Members */}
+        <div className="lg:col-span-3 space-y-8 animate-fade-up" style={{ animationDelay: '300ms' }}>
           <Card
             title="成员"
+            eyebrow="Members"
             action={
               <span className="text-sm text-text-secondary">
-                {onlineIds?.length ?? 0} 在线 / {profiles?.length ?? 0} 成员
+                <span className="num text-success font-medium">{onlineIds?.length ?? 0}</span> 在线 / <span className="num">{profiles?.length ?? 0}</span> 成员
               </span>
             }
           >
@@ -190,7 +246,7 @@ export default function LobbyPage() {
                 ))}
               </div>
             ) : (
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-hairline">
                 {profiles?.map(p => (
                   <MemberRow key={p.id} profile={p} isOnline={onlineIds?.includes(p.id) ?? false} />
                 ))}
@@ -198,12 +254,12 @@ export default function LobbyPage() {
             )}
           </Card>
 
-          {/* Notifications */}
           <Card
             title="通知"
+            eyebrow="Notifications"
             action={
               unreadCount > 0 ? (
-                <button onClick={handleMarkAllRead} className="text-sm text-text-secondary hover:text-accent transition-colors">
+                <button onClick={handleMarkAllRead} className="text-sm text-text-secondary hover:text-accent transition-colors cursor-pointer">
                   全部已读
                 </button>
               ) : undefined
@@ -227,21 +283,20 @@ export default function LobbyPage() {
         </div>
 
         {/* Right column — Quick Actions + Active Votes */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Quick Actions */}
-          <Card title="快速入口">
+        <div className="lg:col-span-2 space-y-8 animate-fade-up" style={{ animationDelay: '380ms' }}>
+          <Card title="快速入口" eyebrow="Quick Actions">
             <div className="space-y-3">
               {quickActions.map(action => (
                 <Link
                   key={action.path}
                   to={action.path}
-                  className="flex items-center gap-4 px-5 py-4 rounded-xl border border-border hover:bg-bg-hover hover:border-border-light transition-all group"
+                  className="flex items-center gap-4 px-5 py-4 rounded-xl border border-hairline bg-bg-elevated/40 hover:bg-bg-hover/70 hover:border-accent/25 transition-all duration-200 group"
                 >
-                  <span className={`${action.color} group-hover:scale-110 transition-transform`}>
+                  <span className={`${action.color} group-hover:scale-110 group-hover:text-accent transition-all duration-200`}>
                     <action.icon />
                   </span>
                   <span className="text-[15px] font-medium">{action.label}</span>
-                  <svg className="w-5 h-5 ml-auto text-text-muted group-hover:text-text-secondary transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="w-5 h-5 ml-auto text-text-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </Link>
@@ -249,9 +304,9 @@ export default function LobbyPage() {
             </div>
           </Card>
 
-          {/* Active Votes */}
           <Card
             title="进行中的投票"
+            eyebrow="Live Votes"
             action={
               <Link to="/votes" className="text-sm text-text-secondary hover:text-accent transition-colors">
                 查看全部

@@ -35,25 +35,40 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-10 max-w-2xl mx-auto">
-      <div className="mb-10">
-        <h1 className="text-3xl font-semibold">设置</h1>
+    <div className="p-6 lg:p-12 max-w-2xl mx-auto">
+      <div className="mb-10 animate-fade-up">
+        <p className="eyebrow mb-3">Settings</p>
+        <h1 className="text-4xl font-semibold tracking-tight">设置</h1>
         <p className="text-text-secondary text-base mt-2">个人资料</p>
       </div>
 
-      <Card>
-        <div className="space-y-8">
+      <div className="animate-fade-up" style={{ animationDelay: '100ms' }}>
+      <Card eyebrow="Profile" title="个人资料">
+        <div className="space-y-9">
+          {/* Preview */}
+          <div className="flex items-center gap-5">
+            <div className="relative shrink-0">
+              <div className="absolute -inset-1.5 rounded-full bg-accent/10 blur-lg pointer-events-none" />
+              <div className="relative w-20 h-20 rounded-full bg-bg-hover ring-1 ring-accent/25 flex items-center justify-center text-4xl">
+                {avatar ? avatar : <span className="font-display italic text-accent">{(nickname || '?').slice(0, 1)}</span>}
+              </div>
+            </div>
+            <div className="min-w-0">
+              <p className="text-xl font-semibold truncate">{nickname || '未命名玩家'}</p>
+              <p className="text-sm text-text-muted truncate mt-0.5">{user?.email}</p>
+            </div>
+          </div>
+
+          <div className="hairline" />
+
           {/* Avatar */}
           <div>
-            <label className="block text-base text-text-secondary mb-4">头像</label>
-            <div className="flex items-center gap-5 mb-5">
-              <div className="w-16 h-16 rounded-full bg-bg-hover flex items-center justify-center text-3xl shrink-0">
-                {avatar ? avatar : (nickname || '?').slice(0, 1)}
-              </div>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-base text-text-secondary">头像</label>
               {avatar && (
                 <button
                   onClick={() => setAvatar('')}
-                  className="text-sm text-text-muted hover:text-danger transition-colors"
+                  className="text-sm text-text-muted hover:text-danger transition-colors cursor-pointer"
                 >
                   移除头像
                 </button>
@@ -64,8 +79,11 @@ export default function SettingsPage() {
                 <button
                   key={a}
                   onClick={() => setAvatar(a)}
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-colors ${
-                    avatar === a ? 'bg-accent-dim ring-2 ring-accent' : 'bg-bg-hover hover:bg-border'
+                  aria-label={`选择头像 ${a}`}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all cursor-pointer ${
+                    avatar === a
+                      ? 'bg-accent-dim ring-2 ring-accent scale-105'
+                      : 'bg-bg-elevated/60 border border-hairline hover:bg-bg-hover hover:scale-105'
                   }`}
                 >
                   {a}
@@ -80,7 +98,7 @@ export default function SettingsPage() {
             <input
               value={nickname}
               onChange={e => setNickname(e.target.value)}
-              className="w-full px-5 py-3 rounded-xl bg-bg-secondary border border-border text-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
+              className="input !text-base !py-3 !px-5"
               placeholder="你的昵称"
             />
           </div>
@@ -91,14 +109,14 @@ export default function SettingsPage() {
             <input
               value={user?.email ?? ''}
               disabled
-              className="w-full px-5 py-3 rounded-xl bg-bg-secondary border border-border text-base text-text-muted cursor-not-allowed"
+              className="input !text-base !py-3 !px-5"
             />
           </div>
 
           {/* Message */}
           {message && (
-            <div className={`px-5 py-3 rounded-xl text-base ${
-              message === '保存成功' ? 'bg-success/15 text-success' : 'bg-danger-dim text-danger'
+            <div className={`px-5 py-3 rounded-lg text-base animate-fade-in ${
+              message === '保存成功' ? 'bg-success/12 text-success border border-success/25' : 'bg-danger-dim text-danger border border-danger/25'
             }`}>
               {message}
             </div>
@@ -112,6 +130,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </Card>
+      </div>
     </div>
   )
 }
