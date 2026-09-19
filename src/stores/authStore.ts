@@ -36,8 +36,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   updateProfile: async (updates: { nickname?: string; avatar_url?: string }) => {
-    const { error } = await supabase.auth.updateUser({ data: updates })
+    const { data, error } = await supabase.auth.updateUser({ data: updates })
     if (error) throw error
+    if (data.user) set({ user: data.user })
   },
 
   signOut: async () => {

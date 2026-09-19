@@ -155,14 +155,18 @@ export async function getAllSchedules(weekStart: string): Promise<Schedule[]> {
 }
 
 export async function upsertSchedule(userId: string, weekStart: string, slots: Record<string, boolean>) {
+  const pruned = Object.fromEntries(Object.entries(slots).filter(([, v]) => v))
   const { error } = await supabase
     .from('schedules')
-    .upsert({
-      user_id: userId,
-      week_start: weekStart,
-      slots,
-      updated_at: new Date().toISOString(),
-    })
+    .upsert(
+      {
+        user_id: userId,
+        week_start: weekStart,
+        slots: pruned,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,week_start' },
+    )
   if (error) throw error
 }
 
