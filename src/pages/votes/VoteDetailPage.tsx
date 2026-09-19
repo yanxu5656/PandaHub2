@@ -70,7 +70,7 @@ export default function VoteDetailPage() {
     : { label: '已结束', cls: 'bg-bg-hover text-text-muted' }
 
   return (
-    <div className="p-6 lg:p-12 max-w-3xl mx-auto">
+    <div className="page-wrap [--page-cap:48rem]">
       <button
         onClick={() => navigate('/votes')}
         className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[15px] text-text-secondary surface hover:text-text-primary hover:border-accent/25 transition-colors cursor-pointer"

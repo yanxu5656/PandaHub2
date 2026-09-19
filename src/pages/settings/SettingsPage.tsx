@@ -35,7 +35,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-12 max-w-2xl mx-auto">
+    <div className="page-wrap [--page-cap:42rem]">
       <div className="mb-10 animate-fade-up">
         <p className="eyebrow mb-3">Settings</p>
         <h1 className="text-4xl font-semibold tracking-tight">设置</h1>

@@ -36,6 +36,10 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
+  /* Ultra-wide breakpoints (4K / large displays) */
+  --breakpoint-3xl: 2200px;
+  --breakpoint-4xl: 3000px;
+
   /* Animations */
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-fade-in: fade-in 0.5s ease both;
@@ -59,6 +63,14 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Fluid page container — holds the 1080p cap, expands proportionally on larger viewports */
+@utility page-wrap {
+  margin-inline: auto;
+  width: 100%;
+  max-width: clamp(var(--page-cap, 80rem), 66vw, calc(var(--page-cap, 80rem) * 2));
+  padding: clamp(1.5rem, 2.8vw, 5rem);
 }
 
 html {

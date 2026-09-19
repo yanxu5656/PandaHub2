@@ -6,14 +6,14 @@ const comingSoonGames = [
 
 export default function MiniGamesPage() {
   return (
-    <div className="p-6 lg:p-12 max-w-4xl mx-auto">
+    <div className="page-wrap [--page-cap:56rem]">
       <div className="mb-10 animate-fade-up">
         <p className="eyebrow mb-3">Arcade</p>
         <h1 className="text-4xl font-semibold tracking-tight">小游戏</h1>
         <p className="text-text-secondary text-base mt-2">和朋友一起玩</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 gap-6">
         {comingSoonGames.map((game, i) => (
           <div
             key={game.name}

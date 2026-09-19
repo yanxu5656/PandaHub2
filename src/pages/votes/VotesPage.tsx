@@ -21,7 +21,7 @@ export default function VotesPage() {
   })
 
   return (
-    <div className="p-6 lg:p-12 max-w-4xl mx-auto">
+    <div className="page-wrap [--page-cap:56rem]">
       <div className="flex items-end justify-between mb-8 animate-fade-up">
         <div>
           <p className="eyebrow mb-3">Votes</p>

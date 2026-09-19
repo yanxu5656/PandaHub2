@@ -198,12 +198,12 @@ export default function LobbyPage() {
   const dateLine = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 · ${['周日', '周一', '周二', '周三', '周四', '周五', '周六'][now.getDay()]}`
 
   return (
-    <div className="p-6 lg:p-12 max-w-7xl mx-auto">
+    <div className="page-wrap">
       {/* Editorial header */}
       <header className="mb-10 animate-fade-up">
         <p className="eyebrow mb-3">{g.en} · {dateLine}</p>
-        <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-          {g.zh}，<span className="gold-text font-display text-5xl lg:text-6xl italic tracking-normal">{nickname}</span>
+        <h1 className="text-4xl lg:text-5xl 3xl:text-6xl font-semibold tracking-tight leading-tight">
+          {g.zh}，<span className="gold-text font-display text-5xl lg:text-6xl 3xl:text-7xl italic tracking-normal">{nickname}</span>
         </h1>
         <p className="text-text-secondary text-base mt-3">今晚谁来集结？先看时间、再投票、然后开玩。</p>
       </header>

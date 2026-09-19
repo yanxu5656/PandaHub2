@@ -237,7 +237,7 @@ export default function GamesPage() {
   }, {})
 
   return (
-    <div className="p-6 lg:p-12 max-w-7xl mx-auto">
+    <div className="page-wrap">
       <div className="flex items-end justify-between mb-10 animate-fade-up">
         <div>
           <p className="eyebrow mb-3">Game Library</p>
@@ -258,7 +258,7 @@ export default function GamesPage() {
             多人共有的游戏
             <span className="font-display italic text-text-muted text-sm">{sharedGames.length}</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6 gap-5">
             {sharedGames.map(g => (
               <GameCard key={g.id} game={g} currentUserId={user?.id} onRefresh={refetch} />
             ))}
@@ -278,7 +278,7 @@ export default function GamesPage() {
             {Object.entries(genreGroups).map(([genre, genreGames]) => (
               <div key={genre}>
                 <h3 className="eyebrow mb-4">{genre} <span className="num">({genreGames.length})</span></h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6 gap-5">
                   {genreGames.map(g => (
                     <GameCard key={g.id} game={g} currentUserId={user?.id} onRefresh={refetch} />
                   ))}

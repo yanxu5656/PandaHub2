@@ -192,7 +192,7 @@ export default function SchedulePage() {
   }, [overlapCount, allSchedules, profiles, user?.id])
 
   return (
-    <div className="p-6 lg:p-12 max-w-7xl mx-auto">
+    <div className="page-wrap">
       <div className="mb-8 animate-fade-up">
         <p className="eyebrow mb-3">Schedule</p>
         <h1 className="text-4xl font-semibold tracking-tight">时间协调</h1>
