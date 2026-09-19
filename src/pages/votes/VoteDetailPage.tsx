@@ -1,19 +1,35 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useAuthStore } from '@/stores/authStore'
+import { useRealtime } from '@/hooks/useRealtime'
 import { getVoteById, submitVote, closeVote } from '@/lib/services'
 
 export default function VoteDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuthStore()
+  const queryClient = useQueryClient()
 
   const { data: vote, isLoading, refetch } = useQuery({
     queryKey: ['vote', id],
     queryFn: () => getVoteById(id!),
     enabled: !!id,
+  })
+
+  useRealtime('vote_records', 'INSERT', (payload) => {
+    if (payload.new?.vote_id === id) {
+      queryClient.invalidateQueries({ queryKey: ['vote', id] })
+      queryClient.invalidateQueries({ queryKey: ['votes'] })
+    }
+  })
+
+  useRealtime('votes', 'UPDATE', (payload) => {
+    if (payload.new?.id === id) {
+      queryClient.invalidateQueries({ queryKey: ['vote', id] })
+      queryClient.invalidateQueries({ queryKey: ['votes'] })
+    }
   })
 
   const handleVote = async (optionIndex: number) => {
@@ -43,12 +59,12 @@ export default function VoteDetailPage() {
   const records = vote.records ?? []
   const totalVotes = records.length
   const myRecord = records.find(r => r.user_id === user?.id)
+  const isExpired = vote.expires_at && new Date(vote.expires_at) < new Date() && vote.status === 'active'
 
-  // Count votes per option
   const optionCounts = vote.options.map((_, i) => records.filter(r => r.option_index === i).length)
 
   return (
-    <div className="p-6 lg:p-8 max-w-3xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-3xl mx-auto">
       <button
         onClick={() => navigate('/votes')}
         className="text-sm text-text-secondary hover:text-text-primary mb-4 transition-colors flex items-center gap-1"
@@ -62,13 +78,21 @@ export default function VoteDetailPage() {
             <h1 className="text-xl font-semibold">{vote.title}</h1>
             <p className="text-sm text-text-muted mt-1">
               {vote.creator?.nickname} 发起 · {new Date(vote.created_at).toLocaleDateString('zh-CN')}
+              {vote.expires_at && (
+                <span className={isExpired ? 'text-danger' : ''}>
+                  {' · 截止 '}{new Date(vote.expires_at).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  {isExpired && ' (已过期)'}
+                </span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className={`px-2.5 py-1 rounded text-xs font-medium ${
-              vote.status === 'active' ? 'bg-success/15 text-success' : 'bg-bg-hover text-text-muted'
+              vote.status === 'active'
+                ? isExpired ? 'bg-danger-dim text-danger' : 'bg-success/15 text-success'
+                : 'bg-bg-hover text-text-muted'
             }`}>
-              {vote.status === 'active' ? '进行中' : '已结束'}
+              {vote.status === 'active' ? isExpired ? '已过期' : '进行中' : '已结束'}
             </span>
             {vote.status === 'active' && user?.id === vote.creator_id && (
               <Button variant="danger" size="sm" onClick={handleClose}>结束投票</Button>
@@ -81,7 +105,7 @@ export default function VoteDetailPage() {
             const count = optionCounts[i]
             const percent = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
             const isMyVote = myRecord?.option_index === i
-            const isVotable = vote.status === 'active' && !myRecord
+            const isVotable = vote.status === 'active' && !myRecord && !isExpired
 
             return (
               <div key={i} className="relative">

@@ -8,7 +8,7 @@ const comingSoonGames = [
 
 export default function MiniGamesPage() {
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">小游戏</h1>
         <p className="text-text-secondary text-sm mt-1">和朋友一起玩</p>

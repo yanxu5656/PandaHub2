@@ -85,7 +85,7 @@ export default function SchedulePage() {
   const isWeekend = (day: number) => day >= 5
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">时间协调</h1>
         <p className="text-text-secondary text-sm mt-1">点击格子标记你的空闲时间，绿色越深表示越多人在这个时间段有空</p>

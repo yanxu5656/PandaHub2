@@ -194,6 +194,8 @@ export async function getVoteById(voteId: string): Promise<Vote | null> {
 export async function createVote(title: string, options: string[], expiresAt?: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('未登录')
+  const nickname = user.user_metadata?.nickname ?? user.email?.split('@')[0] ?? '某人'
+
   const { data, error } = await supabase
     .from('votes')
     .insert({
@@ -205,12 +207,36 @@ export async function createVote(title: string, options: string[], expiresAt?: s
     .select()
     .single()
   if (error) throw error
+
+  const { data: members } = await supabase
+    .from('profiles')
+    .select('id')
+    .neq('id', user.id)
+  if (members) {
+    await Promise.allSettled(
+      members.map(m =>
+        supabase.from('notifications').insert({
+          user_id: m.id,
+          type: 'vote_created',
+          content: `${nickname} 发起了新投票：${title}`,
+        })
+      )
+    )
+  }
+
   return data
 }
 
 export async function submitVote(voteId: string, optionIndex: number) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('未登录')
+
+  const { data: vote } = await supabase
+    .from('votes')
+    .select('title, creator_id, options')
+    .eq('id', voteId)
+    .single()
+
   const { error } = await supabase
     .from('vote_records')
     .upsert({
@@ -219,14 +245,48 @@ export async function submitVote(voteId: string, optionIndex: number) {
       option_index: optionIndex,
     })
   if (error) throw error
+
+  if (vote && vote.creator_id && vote.creator_id !== user.id) {
+    const nickname = user.user_metadata?.nickname ?? user.email?.split('@')[0] ?? '某人'
+    const optionText = vote.options[optionIndex]?.text ?? ''
+    await supabase.from('notifications').insert({
+      user_id: vote.creator_id,
+      type: 'vote_cast',
+      content: `${nickname} 在「${vote.title}」中投了「${optionText}」`,
+    })
+  }
 }
 
 export async function closeVote(voteId: string) {
+  const { data: vote } = await supabase
+    .from('votes')
+    .select('title')
+    .eq('id', voteId)
+    .single()
+
   const { error } = await supabase
     .from('votes')
     .update({ status: 'closed' })
     .eq('id', voteId)
   if (error) throw error
+
+  if (vote) {
+    const { data: records } = await supabase
+      .from('vote_records')
+      .select('user_id')
+      .eq('vote_id', voteId)
+    if (records) {
+      await Promise.allSettled(
+        records.map(r =>
+          supabase.from('notifications').insert({
+            user_id: r.user_id,
+            type: 'vote_closed',
+            content: `投票「${vote.title}」已结束`,
+          })
+        )
+      )
+    }
+  }
 }
 
 // ============================================================

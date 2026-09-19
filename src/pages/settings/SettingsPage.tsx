@@ -32,7 +32,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">设置</h1>
         <p className="text-text-secondary text-sm mt-1">个人资料</p>

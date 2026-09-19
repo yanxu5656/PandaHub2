@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'
 import { useAuthStore } from '@/stores/authStore'
+import { useRealtime } from '@/hooks/useRealtime'
 import {
   getAllProfiles,
   getOnlineUserIds,
@@ -111,11 +112,23 @@ function ActiveVoteCard({ vote }: { vote: Vote }) {
 
 export default function LobbyPage() {
   const { user } = useAuthStore()
+  const queryClient = useQueryClient()
 
-  // Update presence on mount
   useEffect(() => {
     if (user) updatePresence()
   }, [user])
+
+  useRealtime('presence', '*', () => {
+    queryClient.invalidateQueries({ queryKey: ['online'] })
+  })
+
+  useRealtime('notifications', 'INSERT', () => {
+    queryClient.invalidateQueries({ queryKey: ['notifications'] })
+  })
+
+  useRealtime('votes', '*', () => {
+    queryClient.invalidateQueries({ queryKey: ['votes'] })
+  })
 
   const { data: profiles, isLoading: loadingProfiles } = useQuery({
     queryKey: ['profiles'],
@@ -145,7 +158,7 @@ export default function LobbyPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold">大厅</h1>
