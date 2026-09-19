@@ -50,7 +50,7 @@ export default function SettingsPage() {
             <div className="relative shrink-0">
               <div className="absolute -inset-1.5 rounded-full bg-accent/10 blur-lg pointer-events-none" />
               <div className="relative w-20 h-20 rounded-full bg-bg-hover ring-1 ring-accent/25 flex items-center justify-center text-4xl">
-                {avatar ? avatar : <span className="font-display italic text-accent">{(nickname || '?').slice(0, 1)}</span>}
+                {avatar ? avatar : <span className="font-display italic text-accent-deep">{(nickname || '?').slice(0, 1)}</span>}
               </div>
             </div>
             <div className="min-w-0">

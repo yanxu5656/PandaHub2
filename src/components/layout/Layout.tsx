@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import PandaFace from '@/components/ui/PandaFace'
 
 const navItems = [
   { path: '/', label: '大厅', en: 'Lobby', icon: HomeIcon },
@@ -88,13 +89,20 @@ export default function Layout() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="pt-9 pb-7 px-8 shrink-0">
-        <p className="font-display text-[34px] leading-none tracking-wide">
-          Panda<span className="gold-text italic">Hub</span>
-        </p>
-        <div className="flex items-center gap-3 mt-3.5">
-          <span className="h-px w-8 bg-linear-to-r from-accent to-transparent" />
-          <p className="eyebrow text-[10px]">Game Lodge</p>
+      <div className="pt-8 pb-7 px-8 shrink-0">
+        <div className="flex items-center gap-3.5 group cursor-default">
+          <div className="transition-transform duration-300 group-hover:animate-[wiggle_0.6s_ease-in-out_infinite]">
+            <PandaFace size={44} />
+          </div>
+          <div>
+            <p className="font-display text-[30px] leading-none font-bold tracking-wide">
+              Panda<span className="gold-text">Hub</span>
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="h-px w-6 bg-linear-to-r from-accent to-transparent" />
+              <p className="eyebrow text-[9px]">Game Lodge</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -110,10 +118,10 @@ export default function Layout() {
             onClick={closeSidebar}
             style={{ animationDelay: `${i * 40}ms` }}
             className={({ isActive }) =>
-              `group relative flex items-center gap-4 px-6 min-h-14 py-4 rounded-xl text-lg transition-all duration-200 cursor-pointer animate-fade-up ${
+              `group relative flex items-center gap-4 px-6 min-h-14 py-4 rounded-full text-lg font-bold transition-all duration-200 cursor-pointer animate-fade-up ${
                 isActive
-                  ? 'bg-accent-dim text-accent font-semibold'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover/70'
+                  ? 'bg-accent-dim text-accent-deep'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
               }`
             }
           >
@@ -124,7 +132,7 @@ export default function Layout() {
                 )}
                 <item.icon />
                 <span className="flex-1">{item.label}</span>
-                <span className={`font-display text-[15px] italic ${isActive ? 'text-accent/60' : 'text-text-muted/0 group-hover:text-text-muted/60 transition-colors'}`}>
+                <span className={`font-display text-[15px] italic ${isActive ? 'text-accent-deep/60' : 'text-text-muted/0 group-hover:text-text-muted/60 transition-colors'}`}>
                   {item.en}
                 </span>
               </>
@@ -140,7 +148,7 @@ export default function Layout() {
             {userIsEmoji ? (
               <span className="text-xl leading-none">{userAvatar}</span>
             ) : (
-              <span className="text-base font-semibold text-accent">{userInitial}</span>
+              <span className="text-base font-semibold text-accent-deep">{userInitial}</span>
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -167,21 +175,21 @@ export default function Layout() {
   return (
     <div className="flex h-screen">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-[280px] bg-[#0e0e12] border-r border-hairline flex-col shrink-0">
+      <aside className="hidden lg:flex w-[280px] bg-white/70 backdrop-blur-2xl border-r border-hairline flex-col shrink-0">
         {sidebarContent}
       </aside>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-[#35323a]/30 backdrop-blur-sm lg:hidden"
           onClick={closeSidebar}
         />
       )}
 
       {/* Mobile sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[280px] bg-[#0e0e12] border-r border-hairline flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-[280px] bg-white/70 backdrop-blur-2xl border-r border-hairline flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -191,7 +199,7 @@ export default function Layout() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
-        <div className="lg:hidden h-14 flex items-center px-4 border-b border-hairline bg-[#0e0e12] shrink-0">
+        <div className="lg:hidden h-14 flex items-center px-4 border-b border-hairline bg-white/70 backdrop-blur-2xl shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 -ml-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
@@ -203,8 +211,9 @@ export default function Layout() {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <span className="ml-3 font-display text-lg tracking-wide">
-            Panda<span className="gold-text italic">Hub</span>
+          <span className="ml-3 flex items-center gap-2 font-display text-lg font-bold tracking-wide">
+            <PandaFace size={28} />
+            Panda<span className="gold-text">Hub</span>
           </span>
         </div>
 

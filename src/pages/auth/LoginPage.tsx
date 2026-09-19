@@ -61,7 +61,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-lg text-[15px] font-semibold cursor-pointer bg-linear-to-b from-accent-hover to-accent-deep text-[#161207] shadow-[0_2px_12px_rgba(201,168,76,0.25)] hover:shadow-[0_4px_20px_rgba(201,168,76,0.4)] hover:brightness-110 active:translate-y-px transition-all disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full py-3 rounded-full text-[15px] font-bold cursor-pointer bg-linear-to-b from-accent-hover to-accent-deep text-white shadow-[0_2px_12px_rgba(108,191,135,0.35)] hover:shadow-[0_4px_20px_rgba(108,191,135,0.5)] hover:brightness-110 active:translate-y-px transition-all disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? '登录中...' : '登录'}
         </button>
@@ -69,7 +69,7 @@ export default function LoginPage() {
 
       <p className="text-center text-[15px] text-text-secondary mt-7">
         没有账号？{' '}
-        <Link to="/register" className="text-accent hover:text-accent-hover transition-colors">
+        <Link to="/register" className="text-accent-deep hover:text-accent-deep transition-colors">
           注册
         </Link>
       </p>

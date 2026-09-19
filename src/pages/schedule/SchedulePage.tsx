@@ -210,7 +210,7 @@ export default function SchedulePage() {
           </button>
           <button
             onClick={() => setWeekOffset(0)}
-            className="px-5 py-2.5 rounded-lg text-[15px] font-medium bg-accent-dim text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-lg text-[15px] font-medium bg-accent-dim text-accent-deep hover:bg-accent/20 transition-colors cursor-pointer"
           >
             本周
           </button>
@@ -237,14 +237,14 @@ export default function SchedulePage() {
             <table className="w-full border-collapse min-w-[700px] select-none">
               <thead>
                 <tr>
-                  <th className="w-20 px-4 py-4 text-xs font-medium tracking-widest uppercase text-text-muted border-b border-hairline bg-[#101014] text-left sticky left-0 z-10">
+                  <th className="w-20 px-4 py-4 text-xs font-medium tracking-widest uppercase text-text-muted border-b border-hairline bg-[#f2f0e9] text-left sticky left-0 z-10">
                     时间
                   </th>
                   {DAY_NAMES.map((name, i) => (
                     <th
                       key={i}
-                      className={`px-3 py-4 text-sm font-medium border-b border-hairline bg-[#101014] text-center ${
-                        isWeekend(i) ? 'text-accent' : 'text-text-secondary'
+                      className={`px-3 py-4 text-sm font-medium border-b border-hairline bg-[#f2f0e9] text-center ${
+                        isWeekend(i) ? 'text-accent-deep' : 'text-text-secondary'
                       } ${isToday(weekDates[i].date) ? 'bg-accent-dim' : ''}`}
                     >
                       <div>{name}</div>
@@ -256,7 +256,7 @@ export default function SchedulePage() {
               <tbody>
                 {HOURS.map(hour => (
                   <tr key={hour}>
-                    <td className="px-4 py-2 text-sm text-text-muted border-b border-hairline bg-[#101014] sticky left-0 z-10 num">
+                    <td className="px-4 py-2 text-sm text-text-muted border-b border-hairline bg-[#f2f0e9] sticky left-0 z-10 num">
                       {String(hour).padStart(2, '0')}:00
                     </td>
                     {DAY_NAMES.map((_, day) => {
@@ -339,7 +339,7 @@ export default function SchedulePage() {
                     {DAY_NAMES[t.day]} <span className="num text-text-secondary">{String(t.startHour).padStart(2, '0')}:00–{String(t.endHour + 1).padStart(2, '0')}:00</span>
                   </span>
                   {everyone && (
-                    <span className="px-2.5 py-1 rounded-lg text-xs bg-accent-dim text-accent font-medium shrink-0">全员可到</span>
+                    <span className="px-2.5 py-1 rounded-lg text-xs bg-accent-dim text-accent-deep font-medium shrink-0">全员可到</span>
                   )}
                   <div className="h-2 rounded-full bg-bg-hover flex-1 min-w-[80px] overflow-hidden">
                     <div

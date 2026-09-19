@@ -6,8 +6,8 @@
 
 和朋友们协调游戏时间、投票决定玩什么、管理共同游戏库 —— 一个安静的线上小屋。
 
-[![Live](https://img.shields.io/badge/Live-pandahub2.pages.dev-c9a84c?style=flat-square&logo=cloudflare&logoColor=white)](https://pandahub2.pages.dev)
-[![Version](https://img.shields.io/badge/version-v1.0.0-9a7f33?style=flat-square)](https://github.com/yanxu5656/PandaHub2/releases/tag/v1.0.0)
+[![Live](https://img.shields.io/badge/Live-ph.156560.xyz-6cbf87?style=flat-square&logo=cloudflare&logoColor=white)](https://ph.156560.xyz)
+[![Version](https://img.shields.io/badge/version-v1.1.0-4d9e6a?style=flat-square)](https://github.com/yanxu5656/PandaHub2/releases/tag/v1.1.0)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?style=flat-square&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white)
@@ -22,7 +22,7 @@
 
 每个开黑群都见过这样的场面：群里问"今晚玩什么"，回复散落在几十条消息里；谁有空谁没空全靠猜；想一起玩的游戏没人记得谁买了。
 
-**PandaHub 把这些杂乱收敛成一个房间**：拖一下鼠标就能标记空闲时段，黄金热力图直接告诉你大家的重叠时间；投票有实时结果；游戏库按分类聚合，还能看到"两个人以上都有"的游戏。
+**PandaHub 把这些杂乱收敛成一个房间**：拖一下鼠标就能标记空闲时段，竹绿热力图直接告诉你大家的重叠时间；投票有实时结果；游戏库按分类聚合，还能看到"两个人以上都有"的游戏。
 
 > v1 每次跳转都整页刷新、加载 10+ 秒。v2 是一次彻底重写：纯静态 SPA + 数据直连，页面切换即时完成。
 
@@ -33,7 +33,7 @@
 | 模块 | 说明 |
 |---|---|
 | **大厅** | 成员在线状态（Supabase Realtime 实时推送）、通知中心、快捷入口 |
-| **时间协调** | 周视图日历，按住拖拽框选空闲时段；金色热力图叠加全员时间，高亮共同空闲区间 |
+| **时间协调** | 周视图日历，按住拖拽框选空闲时段；竹绿热力图叠加全员时间，高亮共同空闲区间 |
 | **投票** | 发起"今晚玩什么"，一人一票、实时计票、支持截止时间，详情页展示各选项占比 |
 | **游戏库** | 手动添加游戏，多分类标签（预设 12 类 + 自定义分类），按分类分组展示，一键标记"我也有"，自动汇总多人共有的游戏 |
 | **设置** | 昵称与头像（emoji）管理，`user_metadata` 与 `profiles` 双源同步 |
@@ -98,7 +98,7 @@
         前端为纯静态站点，托管于 Cloudflare Pages —— 无自建服务器。
 ```
 
-**设计语言「Gilded Atelier」**：深黑画布 `#0b0b0e` + 鎏金点缀 `#c9a84c`，Instrument Serif 衬线标题配 Manrope 正文，细发丝线、胶片颗粒质感、金色光晕氛围 —— 简约高级，拒绝卡通感。
+**设计语言「Cute Glass Panda」**：奶油底色 `#f7f6f2` + 竹绿主色 `#6cbf87` + 腮红粉点缀，Nunito / Quicksand 圆润字体，毛玻璃卡片、柔光色斑背景、爪印鼠标轨迹 —— 可爱简洁，又不失精致质感。
 
 ## ✦ 数据库
 

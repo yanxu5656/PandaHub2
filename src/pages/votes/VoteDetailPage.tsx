@@ -122,8 +122,8 @@ export default function VoteDetailPage() {
                     className="w-full cursor-pointer text-left px-5 py-4 rounded-xl border border-hairline bg-bg-elevated/40 hover:border-accent/50 hover:bg-accent-dim/40 transition-all duration-200 group"
                   >
                     <div className="flex items-center justify-between relative z-10">
-                      <span className="text-[15px] font-medium group-hover:text-accent transition-colors">{opt.text}</span>
-                      <svg className="w-5 h-5 text-text-muted group-hover:text-accent transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <span className="text-[15px] font-medium group-hover:text-accent-deep transition-colors">{opt.text}</span>
+                      <svg className="w-5 h-5 text-text-muted group-hover:text-accent-deep transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <circle cx="12" cy="12" r="10" />
                         <path d="M8.5 12.5l2.5 2.5 5-6" strokeLinecap="round" strokeLinejoin="round" opacity="0" className="group-hover:opacity-100 transition-opacity" />
                       </svg>
@@ -134,7 +134,7 @@ export default function VoteDetailPage() {
                     isMyVote ? 'border-accent/50 bg-accent-dim/30' : 'border-hairline bg-bg-elevated/30'
                   }`}>
                     <div className="flex items-center justify-between mb-2 relative z-10">
-                      <span className={`text-[15px] font-medium ${isMyVote ? 'text-accent' : ''}`}>
+                      <span className={`text-[15px] font-medium ${isMyVote ? 'text-accent-deep' : ''}`}>
                         {opt.text}
                         {isMyVote && <span className="text-xs ml-2 font-normal opacity-80">← 你的选择</span>}
                       </span>

@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import Layout from '@/components/layout/Layout'
+import CursorFx from '@/components/ui/CursorFx'
+import PandaFace from '@/components/ui/PandaFace'
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
 import LobbyPage from '@/pages/lobby/LobbyPage'
@@ -22,28 +24,27 @@ const queryClient = new QueryClient({
   },
 })
 
+function PandaLoader() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-5 bg-bg-primary">
+      <div className="animate-bounce">
+        <PandaFace size={64} />
+      </div>
+      <p className="text-text-secondary font-display tracking-widest">加载中...</p>
+    </div>
+  )
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthStore()
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
-        <div className="text-text-secondary">加载中...</div>
-      </div>
-    )
-  }
+  if (loading) return <PandaLoader />
   if (!user) return <Navigate to="/login" replace />
   return <>{children}</>
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthStore()
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
-        <div className="text-text-secondary">加载中...</div>
-      </div>
-    )
-  }
+  if (loading) return <PandaLoader />
   if (user) return <Navigate to="/" replace />
   return <>{children}</>
 }
@@ -76,6 +77,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <CursorFx />
         <AppRoutes />
       </BrowserRouter>
     </QueryClientProvider>

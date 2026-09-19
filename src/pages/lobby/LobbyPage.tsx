@@ -74,7 +74,7 @@ function Avatar({ profile, size = 'md' }: { profile: Profile; size?: 'sm' | 'md'
       ) : profile.avatar_url ? (
         <img src={profile.avatar_url} alt={profile.nickname} className="w-full h-full rounded-full object-cover" />
       ) : (
-        <span className="text-accent">{initials}</span>
+        <span className="text-accent-deep">{initials}</span>
       )}
     </div>
   )
@@ -102,7 +102,7 @@ function MemberRow({ profile, isOnline }: { profile: Profile; isOnline: boolean 
         <p className="text-xs text-text-muted mt-0.5">{isOnline ? '在线' : '离线'}</p>
       </div>
       {isAdmin && (
-        <span className="px-2.5 py-1 rounded-lg text-xs bg-accent-dim text-accent font-medium">管理员</span>
+        <span className="px-2.5 py-1 rounded-lg text-xs bg-accent-dim text-accent-deep font-medium">管理员</span>
       )}
     </div>
   )
@@ -125,7 +125,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 function ActiveVoteCard({ vote }: { vote: Vote }) {
   return (
     <Link to={`/votes/${vote.id}`} className="block py-4 border-b border-hairline last:border-0 hover:bg-bg-hover/40 px-2 rounded-lg transition-colors group">
-      <p className="text-[15px] font-medium group-hover:text-accent transition-colors">{vote.title}</p>
+      <p className="text-[15px] font-medium group-hover:text-accent-deep transition-colors">{vote.title}</p>
       <p className="text-sm text-text-muted mt-1.5">
         {vote.creator?.nickname} 发起 · {new Date(vote.created_at).toLocaleDateString('zh-CN')}
       </p>
@@ -259,7 +259,7 @@ export default function LobbyPage() {
             eyebrow="Notifications"
             action={
               unreadCount > 0 ? (
-                <button onClick={handleMarkAllRead} className="text-sm text-text-secondary hover:text-accent transition-colors cursor-pointer">
+                <button onClick={handleMarkAllRead} className="text-sm text-text-secondary hover:text-accent-deep transition-colors cursor-pointer">
                   全部已读
                 </button>
               ) : undefined
@@ -292,7 +292,7 @@ export default function LobbyPage() {
                   to={action.path}
                   className="flex flex-col gap-5 p-5 rounded-xl border border-hairline bg-bg-elevated/40 hover:bg-bg-hover/70 hover:border-accent/25 transition-all duration-200 group"
                 >
-                  <span className={`w-11 h-11 rounded-xl bg-bg-hover/80 border border-hairline flex items-center justify-center ${action.color} group-hover:border-accent/30 group-hover:bg-accent-dim group-hover:text-accent transition-all duration-200`}>
+                  <span className={`w-11 h-11 rounded-xl bg-bg-hover/80 border border-hairline flex items-center justify-center ${action.color} group-hover:border-accent/30 group-hover:bg-accent-dim group-hover:text-accent-deep transition-all duration-200`}>
                     <action.icon />
                   </span>
                   <div>
@@ -308,7 +308,7 @@ export default function LobbyPage() {
             title="进行中的投票"
             eyebrow="Live Votes"
             action={
-              <Link to="/votes" className="text-sm text-text-secondary hover:text-accent transition-colors">
+              <Link to="/votes" className="text-sm text-text-secondary hover:text-accent-deep transition-colors">
                 查看全部
               </Link>
             }

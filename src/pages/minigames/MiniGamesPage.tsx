@@ -26,7 +26,7 @@ export default function MiniGamesPage() {
                 <polygon points="10 8 16 12 10 16 10 8" />
               </svg>
             </div>
-            <p className="font-display italic text-sm text-accent/70 mb-1">{game.en}</p>
+            <p className="font-display italic text-sm text-accent-deep/80 mb-1">{game.en}</p>
             <h3 className="text-base font-semibold">{game.name}</h3>
             <p className="text-sm text-text-muted mt-2">{game.desc}</p>
             <span className="inline-block mt-5 px-3 py-1.5 rounded-lg text-xs border border-hairline bg-bg-hover/70 text-text-muted">

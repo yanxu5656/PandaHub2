@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PandaFace from '@/components/ui/PandaFace'
 import { useAuthStore } from '@/stores/authStore'
 import {
   getGames,
@@ -90,7 +91,7 @@ function GameCard({
         {isOwner ? (
           <button
             onClick={handleUnclaim}
-            className="flex-1 cursor-pointer px-4 py-2.5 rounded-lg text-sm font-medium bg-accent-dim text-accent border border-accent/25 hover:bg-accent/20 transition-colors"
+            className="flex-1 cursor-pointer px-4 py-2.5 rounded-lg text-sm font-medium bg-accent-dim text-accent-deep border border-accent/25 hover:bg-accent/20 transition-colors"
           >
             已拥有 · 取消
           </button>
@@ -175,7 +176,7 @@ function AddGameForm({ onAdded }: { onAdded: () => void }) {
                   onClick={() => toggleGenre(g)}
                   className={`px-4 py-2 rounded-lg text-sm transition-all cursor-pointer ${
                     selected
-                      ? 'bg-accent-dim text-accent border border-accent/40 font-medium'
+                      ? 'bg-accent-dim text-accent-deep border border-accent/40 font-medium'
                       : 'bg-bg-elevated/60 border border-hairline text-text-secondary hover:text-text-primary hover:border-border-light'
                   }`}
                 >
@@ -288,6 +289,9 @@ export default function GamesPage() {
           </div>
         ) : (
           <div className="surface rounded-xl py-14 text-center">
+            <div className="inline-block opacity-70 mb-3">
+              <PandaFace size={56} />
+            </div>
             <p className="font-display text-2xl italic text-text-muted">Empty shelf</p>
             <p className="text-text-muted text-sm mt-2">暂无游戏，添加一个吧</p>
           </div>

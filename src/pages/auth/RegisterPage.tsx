@@ -76,7 +76,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-lg text-[15px] font-semibold cursor-pointer bg-linear-to-b from-accent-hover to-accent-deep text-[#161207] shadow-[0_2px_12px_rgba(201,168,76,0.25)] hover:shadow-[0_4px_20px_rgba(201,168,76,0.4)] hover:brightness-110 active:translate-y-px transition-all disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full py-3 rounded-full text-[15px] font-bold cursor-pointer bg-linear-to-b from-accent-hover to-accent-deep text-white shadow-[0_2px_12px_rgba(108,191,135,0.35)] hover:shadow-[0_4px_20px_rgba(108,191,135,0.5)] hover:brightness-110 active:translate-y-px transition-all disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? '注册中...' : '注册'}
         </button>
@@ -84,7 +84,7 @@ export default function RegisterPage() {
 
       <p className="text-center text-[15px] text-text-secondary mt-7">
         已有账号？{' '}
-        <Link to="/login" className="text-accent hover:text-accent-hover transition-colors">
+        <Link to="/login" className="text-accent-deep hover:text-accent-deep transition-colors">
           登录
         </Link>
       </p>

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PandaFace from '@/components/ui/PandaFace'
 import { getVotes, createVote, type Vote } from '@/lib/services'
 
 const filters = [
@@ -40,7 +41,7 @@ export default function VotesPage() {
             key={f.key}
             onClick={() => setFilter(f.key)}
             className={`px-6 py-2.5 rounded-lg text-[15px] font-medium transition-all cursor-pointer ${
-              filter === f.key ? 'bg-accent-dim text-accent' : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover/60'
+              filter === f.key ? 'bg-accent-dim text-accent-deep' : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover/60'
             }`}
           >
             {f.label}
@@ -62,6 +63,9 @@ export default function VotesPage() {
         </div>
       ) : (
         <div className="surface rounded-xl py-14 text-center">
+          <div className="inline-block opacity-70 mb-3">
+            <PandaFace size={56} />
+          </div>
           <p className="font-display text-2xl italic text-text-muted">Nothing yet</p>
           <p className="text-text-muted text-sm mt-2">还没有{filter === 'active' ? '进行中的' : filter === 'closed' ? '已结束的' : ''}投票</p>
         </div>
@@ -87,7 +91,7 @@ function VoteRow({ vote }: { vote: Vote }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h3 className="text-lg font-semibold tracking-tight group-hover:text-accent transition-colors truncate">{vote.title}</h3>
+          <h3 className="text-lg font-semibold tracking-tight group-hover:text-accent-deep transition-colors truncate">{vote.title}</h3>
           <p className="text-sm text-text-muted mt-1.5">
             {vote.creator?.nickname} 发起 · {new Date(vote.created_at).toLocaleDateString('zh-CN')}
             {vote.expires_at && (
@@ -103,7 +107,7 @@ function VoteRow({ vote }: { vote: Vote }) {
             {vote.status === 'active' && !isExpired && <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />}
             {statusStyle.label}
           </span>
-          <span className="text-sm text-text-secondary num"><span className="font-display text-lg text-accent not-italic">{totalVotes}</span> 票</span>
+          <span className="text-sm text-text-secondary num"><span className="font-display text-lg text-accent-deep not-italic">{totalVotes}</span> 票</span>
         </div>
       </div>
       <div className="flex flex-wrap gap-2 mt-4">
@@ -193,7 +197,7 @@ function CreateForm({ onCreated }: { onCreated: () => void }) {
               </div>
             ))}
           </div>
-          <button type="button" onClick={addOption} className="text-sm text-accent hover:text-accent-hover mt-3 transition-colors cursor-pointer">
+          <button type="button" onClick={addOption} className="text-sm text-accent-deep hover:text-accent-deep mt-3 transition-colors cursor-pointer">
             + 添加选项
           </button>
         </div>
@@ -221,7 +225,7 @@ function CreateForm({ onCreated }: { onCreated: () => void }) {
                   const pad = (n: number) => String(n).padStart(2, '0')
                   setExpiresAt(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`)
                 }}
-                className="px-3 py-1.5 rounded-lg text-xs bg-bg-hover text-text-secondary hover:text-accent hover:bg-accent-dim transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg text-xs bg-bg-hover text-text-secondary hover:text-accent-deep hover:bg-accent-dim transition-colors cursor-pointer"
               >
                 {preset.label}
               </button>
