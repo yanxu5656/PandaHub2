@@ -152,8 +152,8 @@ export default function Layout() {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[15px] font-medium truncate">{user?.user_metadata?.nickname ?? user?.email?.split('@')[0] ?? '用户'}</p>
-            <p className="text-xs text-text-muted truncate">{user?.email}</p>
+            <p className="text-[15px] font-medium leading-snug break-all">{user?.user_metadata?.nickname ?? user?.email?.split('@')[0] ?? '用户'}</p>
+            <p className="text-xs text-text-muted leading-snug break-all">{user?.email}</p>
           </div>
           <button
             onClick={signOut}
