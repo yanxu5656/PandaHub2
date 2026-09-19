@@ -204,19 +204,19 @@ export default function SchedulePage() {
         <div className="surface rounded-xl p-1.5 flex items-center gap-1">
           <button
             onClick={() => setWeekOffset(w => w - 1)}
-            className="px-4 py-2 rounded-lg text-[15px] text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-lg text-[15px] text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
           >
             ← 上周
           </button>
           <button
             onClick={() => setWeekOffset(0)}
-            className="px-4 py-2 rounded-lg text-[15px] font-medium bg-accent-dim text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-lg text-[15px] font-medium bg-accent-dim text-accent hover:bg-accent/20 transition-colors cursor-pointer"
           >
             本周
           </button>
           <button
             onClick={() => setWeekOffset(w => w + 1)}
-            className="px-4 py-2 rounded-lg text-[15px] text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-lg text-[15px] text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
           >
             下周 →
           </button>

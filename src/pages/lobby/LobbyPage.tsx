@@ -18,10 +18,10 @@ import {
 } from '@/lib/services'
 
 const quickActions = [
-  { label: '填写本周时间', path: '/schedule', icon: CalendarIcon, color: 'text-blue-300' },
-  { label: '发起投票', path: '/votes', icon: VoteIcon, color: 'text-purple-300' },
-  { label: '管理游戏库', path: '/games', icon: GamesIcon, color: 'text-emerald-300' },
-  { label: '玩小游戏', path: '/minigames', icon: MiniGameIcon, color: 'text-orange-300' },
+  { label: '填写本周时间', en: 'Schedule', path: '/schedule', icon: CalendarIcon, color: 'text-blue-300' },
+  { label: '发起投票', en: 'Votes', path: '/votes', icon: VoteIcon, color: 'text-purple-300' },
+  { label: '管理游戏库', en: 'Library', path: '/games', icon: GamesIcon, color: 'text-emerald-300' },
+  { label: '玩小游戏', en: 'Arcade', path: '/minigames', icon: MiniGameIcon, color: 'text-orange-300' },
 ]
 
 function CalendarIcon() {
@@ -86,7 +86,7 @@ function MemberRow({ profile, isOnline }: { profile: Profile; isOnline: boolean 
   const isMe = profile.id === user?.id
 
   return (
-    <div className="flex items-center gap-4 py-3.5 group">
+    <div className="flex items-center gap-4 py-4 group">
       <div className="relative shrink-0">
         <Avatar profile={profile} />
         <span
@@ -135,11 +135,11 @@ function ActiveVoteCard({ vote }: { vote: Vote }) {
 
 function StatTile({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
   return (
-    <div className="surface rounded-xl px-5 py-4 flex items-center gap-4">
-      <span className={`font-display text-4xl leading-none num ${accent ? 'gold-text italic' : ''}`}>{value}</span>
+    <div className="surface rounded-xl px-6 py-6 flex items-center gap-5 h-full">
+      <span className={`font-display text-5xl leading-none num ${accent ? 'gold-text italic' : ''}`}>{value}</span>
       <div>
         <p className="eyebrow">{label}</p>
-        <p className="text-sm text-text-secondary mt-1">{label === '在线' ? '人在线' : label === '成员' ? '位成员' : label === '进行中投票' ? '个投票进行中' : '条未读通知'}</p>
+        <p className="text-sm text-text-secondary mt-1.5">{label === '在线' ? '人在线' : label === '成员' ? '位成员' : label === '进行中投票' ? '个投票进行中' : '条未读通知'}</p>
       </div>
     </div>
   )
@@ -209,7 +209,7 @@ export default function LobbyPage() {
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
         <div className="animate-fade-up" style={{ animationDelay: '60ms' }}>
           <StatTile label="在线" value={onlineIds?.length ?? 0} accent />
         </div>
@@ -285,20 +285,20 @@ export default function LobbyPage() {
         {/* Right column — Quick Actions + Active Votes */}
         <div className="lg:col-span-2 space-y-8 animate-fade-up" style={{ animationDelay: '380ms' }}>
           <Card title="快速入口" eyebrow="Quick Actions">
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               {quickActions.map(action => (
                 <Link
                   key={action.path}
                   to={action.path}
-                  className="flex items-center gap-4 px-5 py-4 rounded-xl border border-hairline bg-bg-elevated/40 hover:bg-bg-hover/70 hover:border-accent/25 transition-all duration-200 group"
+                  className="flex flex-col gap-5 p-5 rounded-xl border border-hairline bg-bg-elevated/40 hover:bg-bg-hover/70 hover:border-accent/25 transition-all duration-200 group"
                 >
-                  <span className={`${action.color} group-hover:scale-110 group-hover:text-accent transition-all duration-200`}>
+                  <span className={`w-11 h-11 rounded-xl bg-bg-hover/80 border border-hairline flex items-center justify-center ${action.color} group-hover:border-accent/30 group-hover:bg-accent-dim group-hover:text-accent transition-all duration-200`}>
                     <action.icon />
                   </span>
-                  <span className="text-[15px] font-medium">{action.label}</span>
-                  <svg className="w-5 h-5 ml-auto text-text-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
+                  <div>
+                    <span className="text-[15px] font-medium">{action.label}</span>
+                    <p className="font-display italic text-xs text-text-muted mt-1">{action.en}</p>
+                  </div>
                 </Link>
               ))}
             </div>

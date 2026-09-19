@@ -16,9 +16,9 @@ const variants = {
 }
 
 const sizes = {
-  sm: 'px-3.5 py-1.5 text-sm min-h-9',
-  md: 'px-5 py-2.5 text-sm min-h-10',
-  lg: 'px-6 py-3 text-base min-h-11',
+  sm: 'px-4 py-2 text-sm min-h-9',
+  md: 'px-6 py-2.5 text-[15px] min-h-11',
+  lg: 'px-8 py-3 text-base min-h-12',
 }
 
 export default function Button({ variant = 'primary', size = 'md', className = '', children, ...props }: ButtonProps) {

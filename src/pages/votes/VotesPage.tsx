@@ -39,7 +39,7 @@ export default function VotesPage() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-5 py-2 rounded-lg text-[15px] font-medium transition-all cursor-pointer ${
+            className={`px-6 py-2.5 rounded-lg text-[15px] font-medium transition-all cursor-pointer ${
               filter === f.key ? 'bg-accent-dim text-accent' : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover/60'
             }`}
           >
@@ -83,7 +83,7 @@ function VoteRow({ vote }: { vote: Vote }) {
   return (
     <Link
       to={`/votes/${vote.id}`}
-      className="block surface rounded-xl p-6 hover:border-accent/25 hover:bg-bg-elevated/60 transition-all duration-200 group"
+      className="block surface rounded-xl p-7 hover:border-accent/25 hover:bg-bg-elevated/60 transition-all duration-200 group"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">

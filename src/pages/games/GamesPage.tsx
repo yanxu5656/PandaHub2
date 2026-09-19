@@ -13,6 +13,8 @@ import {
   type Profile,
 } from '@/lib/services'
 
+const PRESET_GENRES = ['动作', '射击', '角色扮演', '策略', '模拟', '竞速', '恐怖', '合作派对', '沙盒建造', '卡牌桌游', '解谜', '格斗']
+
 function GameCard({
   game,
   currentUserId,
@@ -22,7 +24,6 @@ function GameCard({
   currentUserId: string | undefined
   onRefresh: () => void
 }) {
-  const [imgError, setImgError] = useState(false)
   const isOwner = game.owners?.some(o => o.id === currentUserId) ?? false
 
   const handleClaim = async () => {
@@ -41,86 +42,66 @@ function GameCard({
     onRefresh()
   }
 
-  const coverUrl = game.cover_url && !imgError ? game.cover_url : null
-
   return (
-    <div className="surface rounded-xl overflow-hidden group hover:border-accent/25 transition-colors">
-      <div className="relative h-40 bg-bg-secondary overflow-hidden">
-        {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={game.name}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-bg-elevated to-bg-secondary">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-text-muted">
-              <rect x="2" y="6" width="20" height="12" rx="2" />
-              <line x1="6" y1="12" x2="10" y2="12" /><line x1="8" y1="10" x2="8" y2="14" />
-            </svg>
+    <div className="surface rounded-xl p-6 flex flex-col gap-5 hover:border-accent/25 transition-colors">
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-xl border border-accent/25 bg-accent-dim flex items-center justify-center shrink-0">
+          <span className="font-display italic text-xl gold-text">{(game.name || '?').slice(0, 1).toUpperCase()}</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base font-semibold tracking-tight truncate">{game.name}</h3>
+          <p className="text-xs text-text-muted mt-1">{game.platform}</p>
+        </div>
+        <button
+          onClick={handleDelete}
+          className="p-2 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer shrink-0"
+          title="删除"
+          aria-label={`删除 ${game.name}`}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+        </button>
+      </div>
+
+      {game.genres.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {game.genres.map(g => (
+            <span key={g} className="text-xs px-2.5 py-1 rounded-lg bg-bg-hover/70 border border-hairline text-text-secondary">{g}</span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex-1">
+        {game.owners && game.owners.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {game.owners.map((owner: Profile) => (
+              <span key={owner.id} className="text-sm px-2.5 py-1 rounded-lg bg-bg-hover/70 border border-hairline text-text-secondary">
+                {owner.nickname}
+              </span>
+            ))}
           </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-[#131317] to-transparent pointer-events-none" />
-        {isOwner && (
-          <span className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-xs font-medium bg-black/60 backdrop-blur text-accent border border-accent/30">
-            已拥有
-          </span>
+        ) : (
+          <p className="text-sm text-text-muted">还没有人拥有</p>
         )}
       </div>
 
-      <div className="p-5 pt-3">
-        <h3 className="text-base font-semibold truncate tracking-tight">{game.name}</h3>
-        <div className="flex items-center gap-2 mt-2 flex-wrap">
-          <span className="text-xs text-text-muted">{game.platform}</span>
-          {game.genres.map(g => (
-            <span key={g} className="text-xs px-2 py-0.5 rounded-md bg-bg-hover/70 border border-hairline text-text-secondary">{g}</span>
-          ))}
-        </div>
-
-        {game.owners && game.owners.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-hairline">
-            <p className="eyebrow mb-2.5">
-              <span className="num text-text-secondary">{game.owners.length}</span> 人拥有
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {game.owners.map((owner: Profile) => (
-                <span key={owner.id} className="text-sm px-2.5 py-1 rounded-lg bg-bg-hover/70 border border-hairline text-text-secondary">
-                  {owner.nickname}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-2 mt-5">
-          {isOwner ? (
-            <button
-              onClick={handleUnclaim}
-              className="flex-1 cursor-pointer px-4 py-2 rounded-lg text-sm font-medium bg-accent-dim text-accent border border-accent/25 hover:bg-accent/20 transition-colors"
-            >
-              取消拥有
-            </button>
-          ) : (
-            <button
-              onClick={handleClaim}
-              className="flex-1 cursor-pointer px-4 py-2 rounded-lg text-sm font-medium bg-bg-elevated/70 border border-hairline text-text-secondary hover:text-text-primary hover:border-border-light transition-colors"
-            >
-              我也有
-            </button>
-          )}
+      <div className="flex gap-2">
+        {isOwner ? (
           <button
-            onClick={handleDelete}
-            className="px-3 py-2 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer"
-            title="删除"
-            aria-label={`删除 ${game.name}`}
+            onClick={handleUnclaim}
+            className="flex-1 cursor-pointer px-4 py-2.5 rounded-lg text-sm font-medium bg-accent-dim text-accent border border-accent/25 hover:bg-accent/20 transition-colors"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
+            已拥有 · 取消
           </button>
-        </div>
+        ) : (
+          <button
+            onClick={handleClaim}
+            className="flex-1 cursor-pointer px-4 py-2.5 rounded-lg text-sm font-medium bg-bg-elevated/70 border border-hairline text-text-secondary hover:text-text-primary hover:border-border-light transition-colors"
+          >
+            我也有
+          </button>
+        )}
       </div>
     </div>
   )
@@ -128,10 +109,24 @@ function GameCard({
 
 function AddGameForm({ onAdded }: { onAdded: () => void }) {
   const [name, setName] = useState('')
-  const [steamAppId, setSteamAppId] = useState('')
-  const [coverUrl, setCoverUrl] = useState('')
+  const [genres, setGenres] = useState<string[]>([])
+  const [customGenre, setCustomGenre] = useState('')
+  const [extraGenres, setExtraGenres] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const allGenres = [...PRESET_GENRES, ...extraGenres]
+
+  const toggleGenre = (g: string) =>
+    setGenres(prev => (prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]))
+
+  const addCustomGenre = () => {
+    const g = customGenre.trim()
+    if (!g || allGenres.includes(g)) return
+    setExtraGenres(prev => [...prev, g])
+    setGenres(prev => [...prev, g])
+    setCustomGenre('')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -139,12 +134,9 @@ function AddGameForm({ onAdded }: { onAdded: () => void }) {
     setLoading(true)
     setError('')
     try {
-      const appId = steamAppId.trim() ? parseInt(steamAppId.trim(), 10) : undefined
-      const cover = coverUrl.trim() || (appId ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg` : undefined)
-      await addGame(name.trim(), appId, cover)
+      await addGame(name.trim(), undefined, undefined, genres)
       setName('')
-      setSteamAppId('')
-      setCoverUrl('')
+      setGenres([])
       onAdded()
     } catch (err: any) {
       setError(err.message ?? '添加失败')
@@ -164,29 +156,50 @@ function AddGameForm({ onAdded }: { onAdded: () => void }) {
             value={name}
             onChange={e => setName(e.target.value)}
             className="input"
-            placeholder="例如：Elden Ring"
+            placeholder="例如：双人成行"
             required
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-text-secondary mb-2">Steam App ID</label>
-            <input
-              value={steamAppId}
-              onChange={e => setSteamAppId(e.target.value.replace(/\D/g, ''))}
-              className="input"
-              placeholder="例如：1245620"
-            />
+        <div>
+          <label className="block text-sm text-text-secondary mb-2">
+            分类 <span className="text-text-muted">（可多选，已选 {genres.length} 个）</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {allGenres.map(g => {
+              const selected = genres.includes(g)
+              return (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => toggleGenre(g)}
+                  className={`px-4 py-2 rounded-lg text-sm transition-all cursor-pointer ${
+                    selected
+                      ? 'bg-accent-dim text-accent border border-accent/40 font-medium'
+                      : 'bg-bg-elevated/60 border border-hairline text-text-secondary hover:text-text-primary hover:border-border-light'
+                  }`}
+                >
+                  {selected && (
+                    <svg className="inline w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                  {g}
+                </button>
+              )
+            })}
           </div>
-          <div>
-            <label className="block text-sm text-text-secondary mb-2">封面 URL</label>
+          <div className="flex gap-2 mt-3">
             <input
-              value={coverUrl}
-              onChange={e => setCoverUrl(e.target.value)}
-              className="input"
-              placeholder="可选，留空则用 Steam 默认封面"
+              value={customGenre}
+              onChange={e => setCustomGenre(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomGenre() } }}
+              className="input flex-1 max-w-60"
+              placeholder="自定义分类…"
             />
+            <Button type="button" variant="secondary" onClick={addCustomGenre} disabled={!customGenre.trim()}>
+              + 添加分类
+            </Button>
           </div>
         </div>
 
@@ -214,7 +227,7 @@ export default function GamesPage() {
 
   const genreGroups = allGames.reduce<Record<string, Game[]>>((acc, game) => {
     if (game.genres.length === 0) {
-      acc['其他'] = [...(acc['其他'] ?? []), game]
+      acc['未分类'] = [...(acc['未分类'] ?? []), game]
     } else {
       for (const genre of game.genres) {
         acc[genre] = [...(acc[genre] ?? []), game]
@@ -229,7 +242,7 @@ export default function GamesPage() {
         <div>
           <p className="eyebrow mb-3">Game Library</p>
           <h1 className="text-4xl font-semibold tracking-tight">游戏库</h1>
-          <p className="text-text-secondary text-base mt-2">添加和管理你们的游戏</p>
+          <p className="text-text-secondary text-base mt-2">添加和管理你们的游戏，按分类浏览</p>
         </div>
         <Button onClick={() => setShowAdd(!showAdd)}>
           {showAdd ? '取消' : '+ 添加游戏'}

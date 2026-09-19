@@ -70,24 +70,6 @@ function SettingsIcon() {
   )
 }
 
-function BrandMark({ size = 'md' }: { size?: 'sm' | 'md' }) {
-  const box = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10'
-  const icon = size === 'sm' ? 16 : 20
-  return (
-    <div className={`${box} relative rounded-xl shrink-0`}>
-      <div className="absolute inset-0 rounded-xl bg-accent/20 blur-md -z-10" />
-      <div className="w-full h-full rounded-xl border border-accent/30 bg-linear-to-b from-accent/15 to-accent/[0.03] flex items-center justify-center">
-        <svg width={icon} height={icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-accent">
-          <circle cx="12" cy="12" r="9.5" />
-          <circle cx="9" cy="10" r="1.4" fill="currentColor" />
-          <circle cx="15" cy="10" r="1.4" fill="currentColor" />
-          <ellipse cx="12" cy="14" rx="2.8" ry="1.8" />
-        </svg>
-      </div>
-    </div>
-  )
-}
-
 export default function Layout() {
   const { user, signOut } = useAuthStore()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -106,22 +88,20 @@ export default function Layout() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="h-20 flex items-center px-6 shrink-0">
-        <div className="flex items-center gap-3.5">
-          <BrandMark />
-          <div>
-            <p className="font-display text-[21px] leading-none tracking-wide">
-              Panda<span className="gold-text italic">Hub</span>
-            </p>
-            <p className="eyebrow mt-1.5 text-[9px]">Game Lodge</p>
-          </div>
+      <div className="pt-9 pb-7 px-8 shrink-0">
+        <p className="font-display text-[34px] leading-none tracking-wide">
+          Panda<span className="gold-text italic">Hub</span>
+        </p>
+        <div className="flex items-center gap-3 mt-3.5">
+          <span className="h-px w-8 bg-linear-to-r from-accent to-transparent" />
+          <p className="eyebrow text-[10px]">Game Lodge</p>
         </div>
       </div>
 
-      <div className="hairline mx-6" />
+      <div className="hairline mx-8" />
 
       {/* Nav */}
-      <nav className="flex-1 pt-6 pb-4 px-4 space-y-1 overflow-auto">
+      <nav className="flex-1 pt-5 pb-4 px-4 space-y-2 overflow-auto">
         {navItems.map((item, i) => (
           <NavLink
             key={item.path}
@@ -130,7 +110,7 @@ export default function Layout() {
             onClick={closeSidebar}
             style={{ animationDelay: `${i * 40}ms` }}
             className={({ isActive }) =>
-              `group relative flex items-center gap-3.5 px-4 py-3 rounded-lg text-[15px] transition-all duration-200 cursor-pointer animate-fade-up ${
+              `group relative flex items-center gap-4 px-5 py-3.5 rounded-xl text-base transition-all duration-200 cursor-pointer animate-fade-up ${
                 isActive
                   ? 'bg-accent-dim text-accent font-semibold'
                   : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover/70'
@@ -140,7 +120,7 @@ export default function Layout() {
             {({ isActive }) => (
               <>
                 {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-linear-to-b from-accent-hover to-accent-deep" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-linear-to-b from-accent-hover to-accent-deep" />
                 )}
                 <item.icon />
                 <span className="flex-1">{item.label}</span>
@@ -155,12 +135,12 @@ export default function Layout() {
 
       {/* User */}
       <div className="p-4 shrink-0">
-        <div className="surface rounded-xl px-4 py-3.5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-bg-hover ring-1 ring-hairline flex items-center justify-center shrink-0">
+        <div className="surface rounded-xl px-5 py-4 flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-full bg-bg-hover ring-1 ring-hairline flex items-center justify-center shrink-0">
             {userIsEmoji ? (
               <span className="text-xl leading-none">{userAvatar}</span>
             ) : (
-              <span className="text-sm font-semibold text-accent">{userInitial}</span>
+              <span className="text-base font-semibold text-accent">{userInitial}</span>
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -169,7 +149,7 @@ export default function Layout() {
           </div>
           <button
             onClick={signOut}
-            className="p-2 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer"
+            className="p-2.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer"
             title="退出登录"
             aria-label="退出登录"
           >
@@ -187,7 +167,7 @@ export default function Layout() {
   return (
     <div className="flex h-screen">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-[268px] bg-[#0e0e12] border-r border-hairline flex-col shrink-0">
+      <aside className="hidden lg:flex w-[280px] bg-[#0e0e12] border-r border-hairline flex-col shrink-0">
         {sidebarContent}
       </aside>
 
@@ -201,7 +181,7 @@ export default function Layout() {
 
       {/* Mobile sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[268px] bg-[#0e0e12] border-r border-hairline flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-[280px] bg-[#0e0e12] border-r border-hairline flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
