@@ -196,7 +196,7 @@ export default function SchedulePage() {
       <div className="mb-8 animate-fade-up">
         <p className="eyebrow mb-3">Schedule</p>
         <h1 className="text-4xl font-semibold tracking-tight">时间协调</h1>
-        <p className="text-text-secondary text-base mt-2">拖拽选择多个时间段，金色越深表示越多人在这个时间段有空</p>
+        <p className="text-text-secondary text-base mt-2">拖拽选择多个时间段，绿色越深表示越多人在这个时间段有空</p>
       </div>
 
       {/* Week navigation */}

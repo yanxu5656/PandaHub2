@@ -131,7 +131,10 @@ export function getWeekStart(date: Date): string {
   const diff = d.getDate() - day + (day === 0 ? -6 : 1)
   d.setDate(diff)
   d.setHours(0, 0, 0, 0)
-  return d.toISOString().split('T')[0]
+  // 本地时区格式化；toISOString 在 UTC+8 会把日期整体前移一天
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${m}-${dd}`
 }
 
 export async function getSchedule(userId: string, weekStart: string): Promise<Schedule | null> {
