@@ -369,6 +369,58 @@ export async function unclaimGame(gameId: string) {
 }
 
 // ============================================================
+// Game Sessions (小游戏)
+// ============================================================
+
+export interface GameSession {
+  id: string
+  kind: 'tictactoe' | 'gomoku'
+  status: 'waiting' | 'playing' | 'done' | 'cancelled'
+  board: Record<string, string>
+  creator_id: string
+  opponent_id: string | null
+  turn_user_id: string | null
+  winner_id: string | null
+  created_at: string
+  updated_at: string
+  creator?: Profile
+  opponent?: Profile
+}
+
+export async function getGameSessions(): Promise<GameSession[]> {
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .select('*, creator:profiles!game_sessions_creator_id_fkey(*), opponent:profiles!game_sessions_opponent_id_fkey(*)')
+    .order('created_at', { ascending: false })
+    .limit(50)
+  if (error) throw error
+  return data
+}
+
+export async function createGameSession(kind: GameSession['kind']): Promise<GameSession> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('未登录')
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .insert({ kind, creator_id: user.id, board: {} })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function updateGameSession(
+  id: string,
+  updates: Partial<Pick<GameSession, 'board' | 'status' | 'opponent_id' | 'turn_user_id' | 'winner_id'>>,
+) {
+  const { error } = await supabase
+    .from('game_sessions')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}
+
+// ============================================================
 // Notifications
 // ============================================================
 
