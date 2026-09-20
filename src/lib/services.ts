@@ -275,11 +275,13 @@ export async function closeVote(voteId: string) {
     .eq('id', voteId)
     .single()
 
-  const { error } = await supabase
+  const { data: closed, error } = await supabase
     .from('votes')
     .update({ status: 'closed' })
     .eq('id', voteId)
+    .select('id')
   if (error) throw error
+  if (!closed?.length) throw new Error('只有投票发起人可以结束投票')
 
   if (vote) {
     const { data: records } = await supabase

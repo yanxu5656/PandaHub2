@@ -25,10 +25,10 @@ drop policy if exists "game_sessions update" on game_sessions;
 create policy "game_sessions select" on game_sessions for select using (true);
 create policy "game_sessions insert" on game_sessions for insert with check (auth.uid() = creator_id);
 
--- 加入等待中的对局：任何人都可认领一张 waiting 桌，但新行必须把自己设为对手
+-- 加入等待中的对局：任何人都可认领一张 waiting 桌，但新行必须是自己作为对手、且状态变为 playing
 create policy "game_sessions join" on game_sessions for update
   using (status = 'waiting' and auth.uid() <> creator_id)
-  with check (auth.uid() = opponent_id);
+  with check (auth.uid() = opponent_id and status = 'playing');
 
 -- 对局进行中/结束：仅参与者可更新
 create policy "game_sessions update" on game_sessions for update

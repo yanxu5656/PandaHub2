@@ -56,6 +56,7 @@ export default function SchedulePage() {
   const [weekOffset, setWeekOffset] = useState(0)
   const [dragMode, setDragMode] = useState<'add' | 'remove' | null>(null)
   const [draft, setDraft] = useState<Record<string, boolean> | null>(null)
+  const [saveError, setSaveError] = useState('')
 
   const weekStart = useMemo(() => {
     const base = new Date()
@@ -127,6 +128,7 @@ export default function SchedulePage() {
       if (!user || !d) return
       try {
         await upsertSchedule(user.id, weekStart, d)
+        setSaveError('')
         queryClient.setQueryData<Schedule | null>(['my-schedule', weekStart, user.id], old =>
           old ? { ...old, slots: d } : { id: crypto.randomUUID(), user_id: user.id, week_start: weekStart, slots: d, updated_at: new Date().toISOString() },
         )
@@ -134,6 +136,8 @@ export default function SchedulePage() {
         queryClient.invalidateQueries({ queryKey: ['my-schedule', weekStart] })
       } catch (err) {
         console.error('Failed to update schedule:', err)
+        setSaveError('时段保存失败（网络或权限问题），本次勾选未生效，请重试')
+        setTimeout(() => setSaveError(''), 6000)
       } finally {
         setDraftBoth(null)
       }
@@ -308,6 +312,8 @@ export default function SchedulePage() {
         )}
       </Card>
       </div>
+
+      {saveError && <div className="mt-4 px-4 py-2.5 rounded-lg bg-danger-dim text-danger text-sm">{saveError}</div>}
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-6 mt-6 text-sm text-text-muted">

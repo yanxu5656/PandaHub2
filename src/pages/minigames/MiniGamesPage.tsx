@@ -77,11 +77,13 @@ function SessionRow({
 function GameView({
   session,
   userId,
+  busy,
   guard,
   onBack,
 }: {
   session: GameSession
   userId: string
+  busy: boolean
   guard: (fn: () => Promise<void>) => Promise<void>
   onBack: () => void
 }) {
@@ -92,10 +94,13 @@ function GameView({
   const myTurn = session.status === 'playing' && session.turn_user_id === userId
 
   const handleMove = (key: string) => {
-    if (!myTurn || session.board[key] || !opponentId) return
+    if (busy || !myTurn || session.board[key] || !opponentId) return
     guard(async () => {
       const board = { ...session.board, [key]: piece }
-      const result = session.kind === 'tictactoe' ? tttResult(board) : gomokuResult(board, key)
+      const result =
+        (session.kind === 'tictactoe' ? tttResult(board) : gomokuResult(board, key)) ??
+        // 五子棋满盘无胜者 = 平局，防止无子可下卡死
+        (session.kind === 'gomoku' && Object.keys(board).length >= 225 ? 'draw' : null)
       if (result) {
         await updateGameSession(session.id, {
           board,
@@ -153,10 +158,10 @@ function GameView({
             <p className={`text-base font-medium ${myTurn ? 'text-accent-deep' : 'text-text-secondary'}`}>{statusLine}</p>
             <div className="flex items-center gap-2 shrink-0">
               {session.status === 'waiting' && session.creator_id !== userId && (
-                <Button size="sm" onClick={join}>加入对局</Button>
+                <Button size="sm" onClick={join} disabled={busy}>加入对局</Button>
               )}
               {session.status === 'waiting' && isCreator && (
-                <Button size="sm" variant="secondary" onClick={cancel}>取消</Button>
+                <Button size="sm" variant="secondary" onClick={cancel} disabled={busy}>取消</Button>
               )}
             </div>
           </div>
@@ -207,6 +212,9 @@ export default function MiniGamesPage() {
     setBusy(true)
     try {
       await fn()
+      // 写操作后强制刷新到拿到最新状态再解除 busy，
+      // 关闭 realtime 回传前的双击连走/陈旧视图窗口
+      await queryClient.refetchQueries({ queryKey: ['game-sessions'] })
     } catch (err: any) {
       setError(err.message ?? '操作失败')
     } finally {
@@ -234,7 +242,7 @@ export default function MiniGamesPage() {
       </div>
 
       {active && user ? (
-        <GameView session={active} userId={user.id} guard={guard} onBack={() => setActiveId(null)} />
+        <GameView session={active} userId={user.id} busy={busy} guard={guard} onBack={() => setActiveId(null)} />
       ) : (
         <>
           {error && <div className="px-4 py-2.5 rounded-lg bg-danger-dim text-danger text-sm mb-6">{error}</div>}
