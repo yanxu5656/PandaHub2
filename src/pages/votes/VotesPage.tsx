@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import PandaFace from '@/components/ui/PandaFace'
-import { getVotes, createVote, type Vote } from '@/lib/services'
+import { getVotes, createVote, getGames, type Vote } from '@/lib/services'
 
 const filters = [
   { key: 'active', label: '进行中' },
@@ -128,9 +128,23 @@ function CreateForm({ onCreated }: { onCreated: () => void }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const { data: games } = useQuery({ queryKey: ['games'], queryFn: getGames })
+
   const addOption = () => setOptions(prev => [...prev, ''])
   const removeOption = (i: number) => setOptions(prev => prev.filter((_, idx) => idx !== i))
   const updateOption = (i: number, val: string) => setOptions(prev => prev.map((v, idx) => idx === i ? val : v))
+
+  // 从游戏库点选：优先填入第一个空选项，否则追加
+  const gameNames = Array.from(new Set((games ?? []).map(g => g.name)))
+  const usedNames = new Set(options.map(o => o.trim()))
+  const pickGame = (name: string) => {
+    if (usedNames.has(name)) return
+    setOptions(prev => {
+      const i = prev.findIndex(o => !o.trim())
+      if (i === -1) return [...prev, name]
+      return prev.map((o, idx) => (idx === i ? name : o))
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -200,6 +214,32 @@ function CreateForm({ onCreated }: { onCreated: () => void }) {
           <button type="button" onClick={addOption} className="text-sm text-accent-deep hover:text-accent-deep mt-3 transition-colors cursor-pointer">
             + 添加选项
           </button>
+
+          {gameNames.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-hairline">
+              <p className="text-sm text-text-muted mb-2.5">从游戏库快速选择：</p>
+              <div className="flex flex-wrap gap-2">
+                {gameNames.map(name => {
+                  const used = usedNames.has(name)
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => pickGame(name)}
+                      disabled={used}
+                      className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                        used
+                          ? 'bg-accent-dim border-accent/30 text-accent-deep cursor-default'
+                          : 'bg-bg-elevated/60 border-hairline text-text-secondary hover:text-accent-deep hover:border-accent/40 hover:bg-accent-dim cursor-pointer'
+                      }`}
+                    >
+                      {used ? `✓ ${name}` : name}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div>

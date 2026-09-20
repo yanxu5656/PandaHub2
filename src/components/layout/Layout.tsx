@@ -145,7 +145,7 @@ export default function Layout() {
 
       {/* User */}
       <div className="p-4 shrink-0">
-        <div className="surface rounded-xl px-5 py-4 flex items-center gap-3.5">
+        <div className="bg-white rounded-2xl border border-white/90 px-5 py-4 flex items-center gap-3.5 shadow-[0_8px_28px_rgba(83,96,83,0.18)]">
           <div className="w-11 h-11 rounded-full bg-bg-hover ring-1 ring-hairline flex items-center justify-center shrink-0">
             {userIsEmoji ? (
               <span className="text-xl leading-none">{userAvatar}</span>
@@ -175,8 +175,8 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen">
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-[280px] bg-white/70 backdrop-blur-2xl border-r border-hairline flex-col shrink-0">
+      {/* Desktop sidebar — 悬浮卡片式 */}
+      <aside className="hidden lg:flex w-[288px] m-4 rounded-3xl bg-white/75 backdrop-blur-2xl border border-white/80 shadow-[0_12px_48px_rgba(83,96,83,0.16)] flex-col shrink-0 overflow-hidden">
         {sidebarContent}
       </aside>
 
@@ -188,10 +188,10 @@ export default function Layout() {
         />
       )}
 
-      {/* Mobile sidebar */}
+      {/* Mobile sidebar — 同样悬浮 */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[280px] bg-white/70 backdrop-blur-2xl border-r border-hairline flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-2 left-2 z-50 w-[280px] bg-white/80 backdrop-blur-2xl rounded-3xl border border-white/80 shadow-[0_12px_48px_rgba(83,96,83,0.24)] flex flex-col shrink-0 transform transition-transform duration-200 ease-out lg:hidden ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-[110%]'
         }`}
       >
         {sidebarContent}

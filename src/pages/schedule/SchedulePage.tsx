@@ -229,11 +229,11 @@ export default function SchedulePage() {
       </div>
 
       <div className="animate-fade-up" style={{ animationDelay: '160ms' }}>
-      <Card className="overflow-hidden !p-0">
+      <Card className="overflow-hidden !p-0 !rounded-2xl">
         {isLoading ? (
           <div className="p-10 text-center text-text-muted text-base">加载中...</div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-2xl">
             <table className="w-full border-collapse min-w-[520px] sm:min-w-[700px] select-none">
               <thead>
                 <tr>
