@@ -413,11 +413,13 @@ export async function updateGameSession(
   id: string,
   updates: Partial<Pick<GameSession, 'board' | 'status' | 'opponent_id' | 'turn_user_id' | 'winner_id'>>,
 ) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('game_sessions')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
+    .select('id')
   if (error) throw error
+  if (!data?.length) throw new Error('对局更新失败：可能已被他人加入，或数据库策略未更新（请重新执行 003 迁移）')
 }
 
 // ============================================================
