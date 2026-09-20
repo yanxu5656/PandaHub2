@@ -332,6 +332,14 @@ export async function addGame(name: string, steamAppId?: number, coverUrl?: stri
   return data
 }
 
+export async function updateGame(gameId: string, updates: { name?: string; genres?: string[] }) {
+  const { error } = await supabase
+    .from('games')
+    .update(updates)
+    .eq('id', gameId)
+  if (error) throw error
+}
+
 export async function deleteGame(gameId: string) {
   const { error } = await supabase
     .from('games')

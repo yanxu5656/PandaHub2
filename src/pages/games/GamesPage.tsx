@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore'
 import {
   getGames,
   addGame,
+  updateGame,
   deleteGame,
   claimGame,
   unclaimGame,
@@ -15,6 +16,11 @@ import {
 } from '@/lib/services'
 
 const PRESET_GENRES = ['动作', '射击', '角色扮演', '策略', '模拟', '竞速', '恐怖', '合作派对', '沙盒建造', '卡牌桌游', '解谜', '格斗']
+
+/** 拥有者简称：取前两个字即可区分 */
+function ownerShort(nickname: string): string {
+  return nickname.length <= 2 ? nickname : nickname.slice(0, 2)
+}
 
 function GameCard({
   game,
@@ -26,6 +32,39 @@ function GameCard({
   onRefresh: () => void
 }) {
   const isOwner = game.owners?.some(o => o.id === currentUserId) ?? false
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(game.name)
+  const [genres, setGenres] = useState<string[]>(game.genres)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const toggleGenre = (g: string) =>
+    setGenres(prev => (prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]))
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      setError('名称不能为空')
+      return
+    }
+    setSaving(true)
+    setError('')
+    try {
+      await updateGame(game.id, { name: name.trim(), genres })
+      onRefresh()
+      setEditing(false)
+    } catch (err: any) {
+      setError(err.message ?? '保存失败')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setName(game.name)
+    setGenres(game.genres)
+    setError('')
+    setEditing(false)
+  }
 
   const handleClaim = async () => {
     await claimGame(game.id)
@@ -43,67 +82,118 @@ function GameCard({
     onRefresh()
   }
 
+  if (editing) {
+    const allGenres = [...PRESET_GENRES, ...genres.filter(g => !PRESET_GENRES.includes(g))]
+    return (
+      <div className="surface w-72 shrink-0 snap-start rounded-xl p-5 flex flex-col gap-3">
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          className="input !text-base !py-2"
+          placeholder="游戏名称"
+        />
+        <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+          {allGenres.map(g => (
+            <button
+              key={g}
+              type="button"
+              onClick={() => toggleGenre(g)}
+              className={`px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${
+                genres.includes(g)
+                  ? 'bg-accent-dim text-accent-deep border border-accent/40 font-medium'
+                  : 'bg-bg-elevated/60 border border-hairline text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+        {error && <p className="text-xs text-danger">{error}</p>}
+        <div className="flex gap-2">
+          <Button size="sm" onClick={handleSave} disabled={saving} className="flex-1">
+            {saving ? '保存中…' : '保存'}
+          </Button>
+          <Button size="sm" variant="secondary" onClick={handleCancel} className="flex-1">
+            取消
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="surface rounded-xl p-6 flex flex-col gap-5 hover:border-accent/25 transition-colors">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-xl border border-accent/25 bg-accent-dim flex items-center justify-center shrink-0">
-          <span className="font-display italic text-xl gold-text">{(game.name || '?').slice(0, 1).toUpperCase()}</span>
+    <div className="surface w-72 shrink-0 snap-start rounded-xl p-5 flex flex-col gap-4 hover:border-accent/25 transition-colors group">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-lg font-bold tracking-tight leading-snug line-clamp-2 min-w-0">{game.name}</h3>
+        <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => setEditing(true)}
+            className="p-1.5 rounded-lg text-text-muted hover:text-accent-deep hover:bg-accent-dim transition-colors cursor-pointer"
+            title="编辑"
+            aria-label={`编辑 ${game.name}`}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            </svg>
+          </button>
+          <button
+            onClick={handleDelete}
+            className="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer"
+            title="删除"
+            aria-label={`删除 ${game.name}`}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+          </button>
         </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold tracking-tight truncate">{game.name}</h3>
-          <p className="text-xs text-text-muted mt-1">{game.platform}</p>
-        </div>
-        <button
-          onClick={handleDelete}
-          className="p-2 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer shrink-0"
-          title="删除"
-          aria-label={`删除 ${game.name}`}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          </svg>
-        </button>
       </div>
 
       {game.genres.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {game.genres.map(g => (
-            <span key={g} className="text-xs px-2.5 py-1 rounded-lg bg-bg-hover/70 border border-hairline text-text-secondary">{g}</span>
+            <span key={g} className="text-[13px] px-2.5 py-1 rounded-lg bg-accent-dim text-accent-deep font-medium">{g}</span>
           ))}
         </div>
       )}
 
       <div className="flex-1">
         {game.owners && game.owners.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {game.owners.map((owner: Profile) => (
-              <span key={owner.id} className="text-sm px-2.5 py-1 rounded-lg bg-bg-hover/70 border border-hairline text-text-secondary">
-                {owner.nickname}
+              <span
+                key={owner.id}
+                title={owner.nickname}
+                className={`text-[11px] leading-none px-1.5 py-1 rounded-md border ${
+                  owner.id === currentUserId
+                    ? 'bg-accent-dim border-accent/30 text-accent-deep font-medium'
+                    : 'bg-bg-hover/70 border-hairline text-text-muted'
+                }`}
+              >
+                {ownerShort(owner.nickname)}
               </span>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text-muted">还没有人拥有</p>
+          <p className="text-xs text-text-muted">还没有人拥有</p>
         )}
       </div>
 
-      <div className="flex gap-2">
-        {isOwner ? (
-          <button
-            onClick={handleUnclaim}
-            className="flex-1 cursor-pointer px-4 py-2.5 rounded-lg text-sm font-medium bg-accent-dim text-accent-deep border border-accent/25 hover:bg-accent/20 transition-colors"
-          >
-            已拥有 · 取消
-          </button>
-        ) : (
-          <button
-            onClick={handleClaim}
-            className="flex-1 cursor-pointer px-4 py-2.5 rounded-lg text-sm font-medium bg-bg-elevated/70 border border-hairline text-text-secondary hover:text-text-primary hover:border-border-light transition-colors"
-          >
-            我也有
-          </button>
-        )}
-      </div>
+      {isOwner ? (
+        <button
+          onClick={handleUnclaim}
+          className="cursor-pointer w-full px-4 py-2 rounded-lg text-sm font-medium bg-accent-dim text-accent-deep border border-accent/25 hover:bg-accent/20 transition-colors"
+        >
+          已拥有 · 取消
+        </button>
+      ) : (
+        <button
+          onClick={handleClaim}
+          className="cursor-pointer w-full px-4 py-2 rounded-lg text-sm font-medium bg-bg-elevated/70 border border-hairline text-text-secondary hover:text-text-primary hover:border-border-light transition-colors"
+        >
+          我也有
+        </button>
+      )}
     </div>
   )
 }
@@ -180,11 +270,6 @@ function AddGameForm({ onAdded }: { onAdded: () => void }) {
                       : 'bg-bg-elevated/60 border border-hairline text-text-secondary hover:text-text-primary hover:border-border-light'
                   }`}
                 >
-                  {selected && (
-                    <svg className="inline w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
                   {g}
                 </button>
               )
@@ -223,7 +308,6 @@ export default function GamesPage() {
     queryFn: getGames,
   })
 
-  const sharedGames = games?.filter(g => (g.owner_count ?? 0) >= 2) ?? []
   const allGames = games ?? []
 
   const genreGroups = allGames.reduce<Record<string, Game[]>>((acc, game) => {
@@ -252,34 +336,17 @@ export default function GamesPage() {
 
       {showAdd && <AddGameForm onAdded={() => { setShowAdd(false); refetch() }} />}
 
-      {sharedGames.length > 0 && (
-        <section className="mb-12 animate-fade-up" style={{ animationDelay: '80ms' }}>
-          <h2 className="text-base font-semibold mb-5 flex items-center gap-3">
-            <span className="w-1 h-5 rounded-full bg-linear-to-b from-accent-hover to-accent-deep" />
-            多人共有的游戏
-            <span className="font-display italic text-text-muted text-sm">{sharedGames.length}</span>
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6 gap-5">
-            {sharedGames.map(g => (
-              <GameCard key={g.id} game={g} currentUserId={user?.id} onRefresh={refetch} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="animate-fade-up" style={{ animationDelay: '140ms' }}>
-        <h2 className="text-base font-semibold mb-5 flex items-center gap-3">
-          <span className="w-1 h-5 rounded-full bg-linear-to-b from-accent-hover to-accent-deep" />
-          全部游戏
-        </h2>
+      <section className="animate-fade-up" style={{ animationDelay: '80ms' }}>
         {isLoading ? (
           <p className="text-text-muted text-base text-center py-10">加载中...</p>
         ) : Object.keys(genreGroups).length > 0 ? (
           <div className="space-y-10">
             {Object.entries(genreGroups).map(([genre, genreGames]) => (
               <div key={genre}>
-                <h3 className="eyebrow mb-4">{genre} <span className="num">({genreGames.length})</span></h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6 gap-5">
+                <h3 className="eyebrow mb-4">
+                  {genre} <span className="num">({genreGames.length})</span>
+                </h3>
+                <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-1">
                   {genreGames.map(g => (
                     <GameCard key={g.id} game={g} currentUserId={user?.id} onRefresh={refetch} />
                   ))}

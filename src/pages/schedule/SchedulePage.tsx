@@ -234,21 +234,21 @@ export default function SchedulePage() {
           <div className="p-10 text-center text-text-muted text-base">加载中...</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[700px] select-none">
+            <table className="w-full border-collapse min-w-[520px] sm:min-w-[700px] select-none">
               <thead>
                 <tr>
-                  <th className="w-20 px-4 py-4 text-xs font-medium tracking-widest uppercase text-text-muted border-b border-hairline bg-[#f2f0e9] text-left sticky left-0 z-10">
+                  <th className="w-12 sm:w-20 px-2 sm:px-4 py-3 sm:py-4 text-xs font-medium tracking-widest uppercase text-text-muted border-b border-hairline bg-[#f2f0e9] text-left sticky left-0 z-10">
                     时间
                   </th>
                   {DAY_NAMES.map((name, i) => (
                     <th
                       key={i}
-                      className={`px-3 py-4 text-sm font-medium border-b border-hairline bg-[#f2f0e9] text-center ${
+                      className={`px-1 sm:px-3 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b border-hairline bg-[#f2f0e9] text-center ${
                         isWeekend(i) ? 'text-accent-deep' : 'text-text-secondary'
                       } ${isToday(weekDates[i].date) ? 'bg-accent-dim' : ''}`}
                     >
                       <div>{name}</div>
-                      <div className="text-text-muted font-normal mt-1 text-xs num">{weekDates[i].label}</div>
+                      <div className="text-text-muted font-normal mt-1 text-[10px] sm:text-xs num">{weekDates[i].label}</div>
                     </th>
                   ))}
                 </tr>
@@ -256,8 +256,8 @@ export default function SchedulePage() {
               <tbody>
                 {HOURS.map(hour => (
                   <tr key={hour}>
-                    <td className="px-4 py-2 text-sm text-text-muted border-b border-hairline bg-[#f2f0e9] sticky left-0 z-10 num">
-                      {String(hour).padStart(2, '0')}:00
+                    <td className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-text-muted border-b border-hairline bg-[#f2f0e9] sticky left-0 z-10 num">
+                      {String(hour).padStart(2, '0')}<span className="hidden sm:inline">:00</span>
                     </td>
                     {DAY_NAMES.map((_, day) => {
                       const key = getSlotKey(day, hour)
@@ -275,11 +275,11 @@ export default function SchedulePage() {
                       }
 
                       return (
-                        <td key={day} className="border-b border-hairline p-1">
+                        <td key={day} className="border-b border-hairline p-0.5 sm:p-1">
                           <button
                             onMouseDown={() => handleMouseDown(day, hour)}
                             onMouseOver={() => handleMouseEnter(day, hour)}
-                            className={`w-full h-12 rounded-lg transition-all duration-150 cursor-pointer flex items-center justify-center gap-0.5 ${bgClass} ${
+                            className={`w-full h-9 sm:h-12 rounded-lg transition-all duration-150 cursor-pointer flex items-center justify-center gap-0.5 ${bgClass} ${
                               isMine
                                 ? 'hover:brightness-125 ring-1 ring-accent/35'
                                 : 'hover:bg-bg-hover'
@@ -287,12 +287,12 @@ export default function SchedulePage() {
                             title={`${DAY_NAMES[day]} ${hour}:00 — ${isMine ? '有空' : '没空'}${count > 0 ? `，${count} 人有空` : ''}`}
                           >
                             {avatars.length > 0 && avatars.length <= 3 && (
-                              <span className={`text-xs ${isMine ? 'text-text-primary' : 'text-text-muted'}`}>
+                              <span className={`text-[10px] sm:text-xs ${isMine ? 'text-text-primary' : 'text-text-muted'}`}>
                                 {avatars.map(a => a.avatar).join('')}
                               </span>
                             )}
                             {avatars.length > 3 && (
-                              <span className={`text-xs ${isMine ? 'text-text-primary' : 'text-text-muted'}`}>
+                              <span className={`text-[10px] sm:text-xs ${isMine ? 'text-text-primary' : 'text-text-muted'}`}>
                                 {avatars[0].avatar}+{avatars.length - 1}
                               </span>
                             )}

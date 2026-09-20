@@ -99,24 +99,16 @@ export default function Layout() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="pt-8 pb-7 px-8 shrink-0">
-        <div className="flex items-center gap-3.5 group cursor-default">
+      <div className="pt-8 pb-6 px-7 shrink-0">
+        <div className="flex items-center gap-3 group cursor-default">
           <div className="transition-transform duration-300 group-hover:animate-[wiggle_0.6s_ease-in-out_infinite]">
-            <PandaFace size={44} />
+            <PandaFace size={40} />
           </div>
-          <div>
-            <p className="font-display text-[30px] leading-none font-bold tracking-wide">
-              Panda<span className="gold-text">Hub</span>
-            </p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="h-px w-6 bg-linear-to-r from-accent to-transparent" />
-              <p className="eyebrow text-[9px]">Game Lodge</p>
-            </div>
-          </div>
+          <p className="font-display text-[26px] leading-none font-bold tracking-wide">
+            Panda<span className="gold-text">Hub</span>
+          </p>
         </div>
       </div>
-
-      <div className="hairline mx-8" />
 
       {/* Nav */}
       <nav className="flex-1 pt-5 pb-4 px-4 space-y-3 overflow-auto">
@@ -163,7 +155,6 @@ export default function Layout() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-medium leading-snug break-all">{user?.user_metadata?.nickname ?? user?.email?.split('@')[0] ?? '用户'}</p>
-            <p className="text-xs text-text-muted leading-snug break-all">{user?.email}</p>
           </div>
           <button
             onClick={signOut}
