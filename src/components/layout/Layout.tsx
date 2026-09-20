@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { updatePresence } from '@/lib/services'
 import PandaFace from '@/components/ui/PandaFace'
 
 const navItems = [
@@ -81,6 +82,15 @@ export default function Layout() {
   useEffect(() => {
     closeSidebar()
   }, [location.pathname])
+
+  // 在线心跳：进入任意页面即上报，之后每 2 分钟一次（在线判定阈值 5 分钟）
+  useEffect(() => {
+    if (!user) return
+    const beat = () => updatePresence().catch(() => {})
+    beat()
+    const timer = setInterval(beat, 120_000)
+    return () => clearInterval(timer)
+  }, [user])
 
   const userAvatar = user?.user_metadata?.avatar_url
   const userIsEmoji = userAvatar && !userAvatar.startsWith('http')

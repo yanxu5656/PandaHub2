@@ -14,6 +14,8 @@ interface AuthState {
   init: () => Promise<void>
 }
 
+let authListenerBound = false
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
@@ -52,9 +54,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data: { session } } = await supabase.auth.getSession()
       set({ session, user: session?.user ?? null, loading: false })
 
-      supabase.auth.onAuthStateChange((_event, session) => {
-        set({ session, user: session?.user ?? null, loading: false })
-      })
+      if (!authListenerBound) {
+        authListenerBound = true
+        supabase.auth.onAuthStateChange((_event, session) => {
+          set({ session, user: session?.user ?? null, loading: false })
+        })
+      }
     } catch (error) {
       console.error('Auth init failed:', error)
       set({ loading: false })

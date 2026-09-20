@@ -180,7 +180,7 @@ export async function upsertSchedule(userId: string, weekStart: string, slots: R
 export async function getVotes(status?: 'active' | 'closed'): Promise<Vote[]> {
   let query = supabase
     .from('votes')
-    .select('*, creator:profiles(*)')
+    .select('*, creator:profiles(*), records:vote_records(id)')
     .order('created_at', { ascending: false })
   if (status) query = query.eq('status', status)
   const { data, error } = await query
@@ -238,11 +238,15 @@ export async function submitVote(voteId: string, optionIndex: number) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('未登录')
 
-  const { data: vote } = await supabase
+  const { data: vote, error: voteErr } = await supabase
     .from('votes')
-    .select('title, creator_id, options')
+    .select('title, creator_id, options, status, expires_at')
     .eq('id', voteId)
     .single()
+  if (voteErr || !vote) throw new Error('投票不存在')
+  if (vote.status !== 'active') throw new Error('投票已结束，无法投票')
+  if (vote.expires_at && new Date(vote.expires_at) < new Date()) throw new Error('投票已过期，无法投票')
+  if (optionIndex < 0 || optionIndex >= (vote.options?.length ?? 0)) throw new Error('无效的选项')
 
   const { error } = await supabase
     .from('vote_records')

@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
@@ -11,17 +10,16 @@ import {
   getNotifications,
   getVotes,
   markAllNotificationsRead,
-  updatePresence,
   type Profile,
   type Notification,
   type Vote,
 } from '@/lib/services'
 
 const quickActions = [
-  { label: '填写本周时间', en: 'Schedule', path: '/schedule', icon: CalendarIcon, color: 'text-blue-300' },
-  { label: '发起投票', en: 'Votes', path: '/votes', icon: VoteIcon, color: 'text-purple-300' },
-  { label: '管理游戏库', en: 'Library', path: '/games', icon: GamesIcon, color: 'text-emerald-300' },
-  { label: '玩小游戏', en: 'Arcade', path: '/minigames', icon: MiniGameIcon, color: 'text-orange-300' },
+  { label: '填写本周时间', en: 'Schedule', path: '/schedule', icon: CalendarIcon, color: 'text-blue-500' },
+  { label: '发起投票', en: 'Votes', path: '/votes', icon: VoteIcon, color: 'text-purple-500' },
+  { label: '管理游戏库', en: 'Library', path: '/games', icon: GamesIcon, color: 'text-emerald-500' },
+  { label: '玩小游戏', en: 'Arcade', path: '/minigames', icon: MiniGameIcon, color: 'text-orange-500' },
 ]
 
 function CalendarIcon() {
@@ -90,7 +88,7 @@ function MemberRow({ profile, isOnline }: { profile: Profile; isOnline: boolean 
       <div className="relative shrink-0">
         <Avatar profile={profile} />
         <span
-          className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#15151a] ${isOnline ? 'bg-success' : 'bg-border-light'}`}
+          className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${isOnline ? 'bg-success' : 'bg-border-light'}`}
           title={isOnline ? '在线' : '离线'}
         />
       </div>
@@ -149,10 +147,6 @@ export default function LobbyPage() {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
 
-  useEffect(() => {
-    if (user) updatePresence()
-  }, [user])
-
   useRealtime('presence', '*', () => {
     queryClient.invalidateQueries({ queryKey: ['online'] })
   })
@@ -187,9 +181,13 @@ export default function LobbyPage() {
   })
 
   const unreadCount = notifications?.filter(n => !n.is_read).length ?? 0
+  const liveVotes = (activeVotes ?? []).filter(
+    v => !v.expires_at || new Date(v.expires_at) >= new Date(),
+  )
 
   const handleMarkAllRead = async () => {
     await markAllNotificationsRead()
+    await queryClient.invalidateQueries({ queryKey: ['notifications'] })
   }
 
   const g = greeting()
@@ -217,7 +215,7 @@ export default function LobbyPage() {
           <StatTile label="成员" value={profiles?.length ?? 0} />
         </div>
         <div className="animate-fade-up" style={{ animationDelay: '180ms' }}>
-          <StatTile label="进行中投票" value={activeVotes?.length ?? 0} />
+          <StatTile label="进行中投票" value={liveVotes.length} />
         </div>
         <div className="animate-fade-up" style={{ animationDelay: '240ms' }}>
           <StatTile label="未读通知" value={unreadCount} />
@@ -313,9 +311,9 @@ export default function LobbyPage() {
               </Link>
             }
           >
-            {activeVotes && activeVotes.length > 0 ? (
+            {liveVotes.length > 0 ? (
               <div>
-                {activeVotes.map(v => (
+                {liveVotes.map(v => (
                   <ActiveVoteCard key={v.id} vote={v} />
                 ))}
               </div>

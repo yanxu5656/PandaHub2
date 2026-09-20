@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
@@ -32,16 +33,35 @@ export default function VoteDetailPage() {
     }
   })
 
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
   const handleVote = async (optionIndex: number) => {
-    if (!user || !id) return
-    await submitVote(id, optionIndex)
-    refetch()
+    if (!user || !id || submitting) return
+    setSubmitting(true)
+    setError('')
+    try {
+      await submitVote(id, optionIndex)
+      refetch()
+    } catch (err: any) {
+      setError(err.message ?? '投票失败')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleClose = async () => {
-    if (!id) return
-    await closeVote(id)
-    refetch()
+    if (!id || submitting) return
+    setSubmitting(true)
+    setError('')
+    try {
+      await closeVote(id)
+      refetch()
+    } catch (err: any) {
+      setError(err.message ?? '结束投票失败')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (isLoading) {
@@ -100,10 +120,12 @@ export default function VoteDetailPage() {
           <div className="flex flex-col items-end gap-3 shrink-0">
             <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${statusStyle.cls}`}>{statusStyle.label}</span>
             {vote.status === 'active' && user?.id === vote.creator_id && (
-              <Button variant="danger" size="sm" onClick={handleClose}>结束投票</Button>
+              <Button variant="danger" size="sm" onClick={handleClose} disabled={submitting}>结束投票</Button>
             )}
           </div>
         </div>
+
+        {error && <div className="px-4 py-2.5 rounded-lg bg-danger-dim text-danger text-sm mb-4">{error}</div>}
 
         <div className="hairline my-6" />
 
@@ -119,7 +141,8 @@ export default function VoteDetailPage() {
                 {isVotable ? (
                   <button
                     onClick={() => handleVote(i)}
-                    className="w-full cursor-pointer text-left px-5 py-4 rounded-xl border border-hairline bg-bg-elevated/40 hover:border-accent/50 hover:bg-accent-dim/40 transition-all duration-200 group"
+                    disabled={submitting}
+                    className="w-full cursor-pointer text-left px-5 py-4 rounded-xl border border-hairline bg-bg-elevated/40 hover:border-accent/50 hover:bg-accent-dim/40 transition-all duration-200 group disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <div className="flex items-center justify-between relative z-10">
                       <span className="text-[15px] font-medium group-hover:text-accent-deep transition-colors">{opt.text}</span>
