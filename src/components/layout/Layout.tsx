@@ -230,7 +230,7 @@ export default function Layout() {
             className={({ isActive }) =>
               `group relative flex items-center gap-4 px-6 min-h-14 py-4 rounded-full text-lg font-bold transition-all duration-200 cursor-pointer animate-fade-up ${
                 isActive
-                  ? 'bg-accent-dim text-accent-deep'
+                  ? 'bg-linear-to-r from-accent-dim to-accent-dim/25 text-accent-deep'
                   : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
               }`
             }

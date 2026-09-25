@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PageHeader from '@/components/ui/PageHeader'
 import { useAuthStore } from '@/stores/authStore'
 import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
 import { useRealtime } from '@/hooks/useRealtime'
@@ -27,13 +28,13 @@ function nameOf(s: GameSession, role: 'creator' | 'opponent'): string {
 
 function StatusBadge({ s }: { s: GameSession }) {
   const map = {
-    waiting: { label: '等待对手', cls: 'bg-accent-dim text-accent-deep' },
-    playing: { label: '进行中', cls: 'bg-success/12 text-success' },
-    done: { label: '已结束', cls: 'bg-bg-hover text-text-muted' },
-    cancelled: { label: '已取消', cls: 'bg-bg-hover text-text-muted' },
+    waiting: { label: '等待对手', cls: 'pill-accent' },
+    playing: { label: '进行中', cls: 'pill-success' },
+    done: { label: '已结束', cls: 'pill-muted' },
+    cancelled: { label: '已取消', cls: 'pill-muted' },
   } as const
   const b = map[s.status]
-  return <span className={`px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 ${b.cls}`}>{b.label}</span>
+  return <span className={`pill shrink-0 ${b.cls}`}>{b.label}</span>
 }
 
 function SessionRow({
@@ -263,11 +264,7 @@ export default function MiniGamesPage() {
 
   return (
     <div className="page-wrap [--page-cap:64rem]">
-      <div className="mb-10 animate-fade-up">
-        <p className="eyebrow mb-3">Arcade</p>
-        <h1 className="text-4xl font-semibold tracking-tight">小游戏</h1>
-        <p className="text-text-secondary text-base mt-2">和朋友实时对战，开一局吧</p>
-      </div>
+      <PageHeader eyebrow="Arcade" title="小游戏" desc="和朋友实时对战，开一局吧" />
 
       {active && user ? (
         <GameView session={active} userId={user.id} busy={busy} guard={guard} onBack={() => setActiveId(null)} />

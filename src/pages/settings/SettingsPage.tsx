@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PageHeader from '@/components/ui/PageHeader'
 import { useAuthStore } from '@/stores/authStore'
 import { useCircleStore } from '@/stores/circleStore'
 import { updateProfile, getAllProfiles, setPlatformRole } from '@/lib/services'
@@ -59,11 +60,7 @@ export default function SettingsPage() {
 
   return (
     <div className="page-wrap [--page-cap:42rem]">
-      <div className="mb-10 animate-fade-up">
-        <p className="eyebrow mb-3">Settings</p>
-        <h1 className="text-4xl font-semibold tracking-tight">设置</h1>
-        <p className="text-text-secondary text-base mt-2">个人资料</p>
-      </div>
+      <PageHeader eyebrow="Settings" title="设置" desc="个人资料与平台管理" />
 
       <div className="animate-fade-up" style={{ animationDelay: '100ms' }}>
       <Card eyebrow="Profile" title="个人资料">

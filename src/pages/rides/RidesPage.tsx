@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PageHeader from '@/components/ui/PageHeader'
 import Avatar from '@/components/ui/Avatar'
 import { useAuthStore } from '@/stores/authStore'
 import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
@@ -19,10 +20,10 @@ import {
 } from '@/lib/services'
 
 const STATUS_META = {
-  recruiting: { label: '招募中', cls: 'bg-accent-dim text-accent-deep' },
-  driving: { label: '已发车', cls: 'bg-blue-100 text-blue-600' },
-  ended: { label: '已结束', cls: 'bg-bg-hover text-text-muted' },
-  cancelled: { label: '已取消', cls: 'bg-bg-hover text-text-muted' },
+  recruiting: { label: '招募中', cls: 'pill-accent' },
+  driving: { label: '已发车', cls: 'pill-info' },
+  ended: { label: '已结束', cls: 'pill-muted' },
+  cancelled: { label: '已取消', cls: 'pill-muted' },
 } as const
 
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
@@ -129,12 +130,12 @@ function RideCard({
             <p className="text-[15px] font-bold">
               {fmtDate(ride.ride_date)} {hourLabel(ride.start_hour)} - {hourLabel(ride.end_hour)}
             </p>
-            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${meta.cls}`}>{meta.label}</span>
+            <span className={`pill ${meta.cls}`}>{meta.label}</span>
             {expired && ride.status !== 'ended' && ride.status !== 'cancelled' && (
-              <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-bg-hover text-text-muted">已过期</span>
+              <span className="pill pill-muted">已过期</span>
             )}
             {isFull(ride) && ride.status === 'recruiting' && (
-              <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-danger-dim text-danger">已满</span>
+              <span className="pill pill-danger">已满</span>
             )}
           </div>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap text-sm text-text-secondary">
@@ -377,14 +378,12 @@ export default function RidesPage() {
 
   return (
     <div className="page-wrap [--page-cap:56rem]">
-      <div className="mb-10 flex items-end justify-between gap-6 animate-fade-up">
-        <div>
-          <p className="eyebrow mb-3">Rides</p>
-          <h1 className="text-4xl font-semibold tracking-tight">开黑车</h1>
-          <p className="text-text-secondary text-base mt-2">选个时间段、带上想玩的游戏，发车喊人上车</p>
-        </div>
-        {!showForm && <Button onClick={() => setShowForm(true)} disabled={busy}>我要发车</Button>}
-      </div>
+      <PageHeader
+        eyebrow="Rides"
+        title="开黑车"
+        desc="选个时间段、带上想玩的游戏，发车喊人上车"
+        side={!showForm ? <Button onClick={() => setShowForm(true)} disabled={busy}>我要发车</Button> : undefined}
+      />
 
       {error && <div className="px-4 py-2.5 rounded-lg bg-danger-dim text-danger text-sm mb-6">{error}</div>}
 

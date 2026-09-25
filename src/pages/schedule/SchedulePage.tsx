@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/ui/PageHeader'
 import { useAuthStore } from '@/stores/authStore'
 import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
 import {
@@ -223,11 +224,11 @@ export default function SchedulePage() {
 
   return (
     <div className="page-wrap">
-      <div className="mb-8 animate-fade-up">
-        <p className="eyebrow mb-3">Schedule</p>
-        <h1 className="text-4xl font-semibold tracking-tight">时间协调</h1>
-        <p className="text-text-secondary text-base mt-2">拖拽选择多个时间段，绿色越深表示越多人在这个时间段有空</p>
-      </div>
+      <PageHeader
+        eyebrow="Schedule"
+        title="时间协调"
+        desc="拖拽选择多个时间段，绿色越深表示越多人在这个时间段有空"
+      />
 
       {/* Week navigation */}
       <div className="flex flex-wrap items-center gap-4 mb-8 animate-fade-up" style={{ animationDelay: '80ms' }}>

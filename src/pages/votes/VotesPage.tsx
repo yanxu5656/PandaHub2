@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PageHeader from '@/components/ui/PageHeader'
 import PandaFace from '@/components/ui/PandaFace'
 import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
 import { getVotes, createVote, deleteVote, getGames, type Vote } from '@/lib/services'
@@ -26,16 +27,12 @@ export default function VotesPage() {
 
   return (
     <div className="page-wrap [--page-cap:56rem]">
-      <div className="flex items-end justify-between mb-8 animate-fade-up">
-        <div>
-          <p className="eyebrow mb-3">Votes</p>
-          <h1 className="text-4xl font-semibold tracking-tight">投票</h1>
-          <p className="text-text-secondary text-base mt-2">发起和参与投票</p>
-        </div>
-        <Button onClick={() => setShowCreate(!showCreate)}>
-          {showCreate ? '取消' : '+ 发起投票'}
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Votes"
+        title="投票"
+        desc="发起和参与投票"
+        side={<Button onClick={() => setShowCreate(!showCreate)}>{showCreate ? '取消' : '+ 发起投票'}</Button>}
+      />
 
       {/* Filter tabs */}
       <div className="surface rounded-xl p-1.5 flex gap-1 w-fit mb-8 animate-fade-up" style={{ animationDelay: '80ms' }}>
@@ -87,9 +84,9 @@ function VoteRow({ vote }: { vote: Vote }) {
 
   const statusStyle = vote.status === 'active'
     ? isExpired
-      ? { label: '已过期', cls: 'bg-danger-dim text-danger' }
-      : { label: '进行中', cls: 'bg-success/12 text-success' }
-    : { label: '已结束', cls: 'bg-bg-hover text-text-muted' }
+      ? { label: '已过期', cls: 'pill-danger' }
+      : { label: '进行中', cls: 'pill-success' }
+    : { label: '已结束', cls: 'pill-muted' }
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -128,7 +125,7 @@ function VoteRow({ vote }: { vote: Vote }) {
           {delError && <p className="text-sm text-danger mt-2">{delError}</p>}
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <span className={`px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 ${statusStyle.cls}`}>
+          <span className={`pill ${statusStyle.cls}`}>
             {vote.status === 'active' && !isExpired && <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />}
             {statusStyle.label}
           </span>

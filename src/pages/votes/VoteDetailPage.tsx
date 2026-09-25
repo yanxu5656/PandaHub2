@@ -86,9 +86,9 @@ export default function VoteDetailPage() {
 
   const statusStyle = vote.status === 'active'
     ? isExpired
-      ? { label: '已过期', cls: 'bg-danger-dim text-danger' }
-      : { label: '进行中', cls: 'bg-success/12 text-success' }
-    : { label: '已结束', cls: 'bg-bg-hover text-text-muted' }
+      ? { label: '已过期', cls: 'pill-danger' }
+      : { label: '进行中', cls: 'pill-success' }
+    : { label: '已结束', cls: 'pill-muted' }
 
   return (
     <div className="page-wrap [--page-cap:48rem]">
@@ -119,7 +119,7 @@ export default function VoteDetailPage() {
             </p>
           </div>
           <div className="flex flex-col items-end gap-3 shrink-0">
-            <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${statusStyle.cls}`}>{statusStyle.label}</span>
+            <span className={`pill ${statusStyle.cls}`}>{statusStyle.label}</span>
             {vote.status === 'active' && (user?.id === vote.creator_id || isCircleAdmin()) && (
               <Button variant="danger" size="sm" onClick={handleClose} disabled={submitting}>结束投票</Button>
             )}

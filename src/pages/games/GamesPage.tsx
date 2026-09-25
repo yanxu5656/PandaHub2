@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PageHeader from '@/components/ui/PageHeader'
 import PandaFace from '@/components/ui/PandaFace'
 import { useAuthStore } from '@/stores/authStore'
 import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
@@ -336,16 +337,12 @@ export default function GamesPage() {
 
   return (
     <div className="page-wrap">
-      <div className="flex items-end justify-between mb-10 animate-fade-up">
-        <div>
-          <p className="eyebrow mb-3">Game Library</p>
-          <h1 className="text-4xl font-semibold tracking-tight">游戏库</h1>
-          <p className="text-text-secondary text-base mt-2">添加和管理你们的游戏，按分类浏览</p>
-        </div>
-        <Button onClick={() => setShowAdd(!showAdd)}>
-          {showAdd ? '取消' : '+ 添加游戏'}
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Game Library"
+        title="游戏库"
+        desc="添加和管理你们的游戏，按分类浏览"
+        side={<Button onClick={() => setShowAdd(!showAdd)}>{showAdd ? '取消' : '+ 添加游戏'}</Button>}
+      />
 
       {showAdd && <AddGameForm onAdded={() => { setShowAdd(false); refetch() }} />}
 

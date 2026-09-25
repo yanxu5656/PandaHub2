@@ -7,7 +7,7 @@
 和朋友们协调游戏时间、投票决定玩什么、管理共同游戏库 —— 一个安静的线上小屋。
 
 [![Live](https://img.shields.io/badge/Live-ph.156560.xyz-6cbf87?style=flat-square&logo=cloudflare&logoColor=white)](https://ph.156560.xyz)
-[![Version](https://img.shields.io/badge/version-v2.1.1-4d9e6a?style=flat-square)](https://github.com/yanxu5656/PandaHub2/releases/tag/v2.1.1)
+[![Version](https://img.shields.io/badge/version-v2.1.2-4d9e6a?style=flat-square)](https://github.com/yanxu5656/PandaHub2/releases/tag/v2.1.2)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?style=flat-square&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white)

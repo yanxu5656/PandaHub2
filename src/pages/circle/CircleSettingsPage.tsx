@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import PageHeader from '@/components/ui/PageHeader'
 import Skeleton from '@/components/ui/Skeleton'
 import { useAuthStore } from '@/stores/authStore'
 import { useCircleStore } from '@/stores/circleStore'
@@ -152,14 +153,17 @@ export default function CircleSettingsPage() {
 
   return (
     <div className="page-wrap [--page-cap:52rem]">
-      <div className="mb-8 animate-fade-up">
-        <p className="eyebrow mb-3">Circle Settings</p>
-        <h1 className="text-4xl font-semibold tracking-tight">{circle.name}</h1>
-        <p className="text-text-secondary text-base mt-2">
-          你在本圈的身份：<span className="text-accent-deep font-medium">{ROLE_LABEL[circle.my_role]}</span>
-          {platformRole === 'super' && <span className="ml-2 text-blush-deep font-medium">· 平台超管</span>}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Circle Settings"
+        title={circle.name}
+        desc={
+          <>
+            你在本圈的身份：
+            <span className="pill pill-blush ml-1">{ROLE_LABEL[circle.my_role]}</span>
+            {platformRole === 'super' && <span className="pill pill-gold ml-1.5">平台超管</span>}
+          </>
+        }
+      />
 
       {msg && (
         <div className="mb-6 px-4 py-3 rounded-lg bg-accent-dim border border-accent/25 text-accent-deep text-sm animate-fade-in">{msg}</div>
@@ -253,10 +257,10 @@ export default function CircleSettingsPage() {
                         </p>
                         <p className="text-xs text-text-muted mt-0.5">加入于 {new Date(m.joined_at).toLocaleDateString('zh-CN')}</p>
                       </div>
-                      <span className={`px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 ${
-                        m.role === 'owner' ? 'bg-blush-dim text-blush-deep' :
-                        m.role === 'admin' ? 'bg-accent-dim text-accent-deep' :
-                        'bg-bg-hover text-text-secondary'
+                      <span className={`pill shrink-0 ${
+                        m.role === 'owner' ? 'pill-blush' :
+                        m.role === 'admin' ? 'pill-accent' :
+                        'pill-muted'
                       }`}>
                         {ROLE_LABEL[m.role]}
                       </span>

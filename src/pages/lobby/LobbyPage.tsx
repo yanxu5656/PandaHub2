@@ -87,7 +87,7 @@ function MemberRow({ profile, isOnline, role }: { profile: Profile; isOnline: bo
         <p className="text-xs text-text-muted mt-0.5">{isOnline ? '在线' : '离线'}</p>
       </div>
       {role !== 'member' && (
-        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${role === 'owner' ? 'bg-blush-dim text-blush-deep' : 'bg-accent-dim text-accent-deep'}`}>
+        <span className={`pill ${role === 'owner' ? 'pill-blush' : 'pill-accent'}`}>
           {CIRCLE_ROLE_LABEL[role]}
         </span>
       )}
