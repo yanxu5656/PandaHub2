@@ -62,6 +62,7 @@ begin
   if p_start is null or p_end is null or p_start < 0 or p_start > 23 or p_end > 24 or p_end <= p_start then
     raise exception '无效的时间段';
   end if;
+  p_capacity := coalesce(p_capacity, 0);
   if p_capacity < 0 then raise exception '无效的车位设置'; end if;
   if p_capacity = 1 then raise exception '车位至少为 2（含司机），不限人数请填 0'; end if;
 
@@ -91,10 +92,15 @@ declare
 begin
   if v_uid is null then raise exception '未登录'; end if;
   select * into v_ride from rides where id = p_ride_id for update;
-  if not found then raise exception '对局不存在或已被取消'; end if;
+  if not found then raise exception '这辆车不存在或已被取消'; end if;
   if not is_circle_member(v_ride.circle_id) then raise exception '只有圈内成员可以上车'; end if;
   if v_ride.status <> 'recruiting' then raise exception '这辆车已经不招募了'; end if;
-  if v_ride.ride_date < current_date then raise exception '这辆车已经过期了'; end if;
+  -- 过期 = 过去的日期，或今天但结束时间已过（按东八区，用户全部在国内）
+  if v_ride.ride_date < current_date
+     or (v_ride.ride_date = current_date
+         and v_ride.end_hour <= extract(hour from (now() at time zone 'Asia/Shanghai'))::int) then
+    raise exception '这辆车已经过期了';
+  end if;
   if v_ride.driver_id = v_uid then raise exception '你就是司机'; end if;
   if exists (select 1 from ride_members where ride_id = p_ride_id and user_id = v_uid) then
     raise exception '你已经在这辆车上了';
@@ -133,7 +139,7 @@ declare v_ride rides;
 begin
   if auth.uid() is null then raise exception '未登录'; end if;
   select * into v_ride from rides where id = p_ride_id;
-  if not found then raise exception '对局不存在或已被取消'; end if;
+  if not found then raise exception '这辆车不存在或已被取消'; end if;
   if not (v_ride.driver_id = auth.uid() or is_circle_admin(v_ride.circle_id) or is_platform_super()) then
     raise exception '没有踢人权限';
   end if;

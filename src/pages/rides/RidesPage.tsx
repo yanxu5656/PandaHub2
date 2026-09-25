@@ -54,6 +54,13 @@ function isFull(r: Ride) {
   return r.capacity > 0 && takenSeats(r) >= r.capacity
 }
 
+// 与 join_ride RPC 同语义：过去的日期，或今天但结束时间已过
+function isExpired(r: Ride) {
+  const t = todayStr()
+  if (r.ride_date !== t) return r.ride_date < t
+  return r.end_hour <= new Date().getHours()
+}
+
 function SeatDots({ ride, canKick, onKick }: { ride: Ride; canKick: boolean; onKick: (uid: string) => void }) {
   const members = ride.ride_members ?? []
   const empties = ride.capacity > 0 ? Math.max(0, ride.capacity - takenSeats(ride)) : 0
@@ -70,7 +77,7 @@ function SeatDots({ ride, canKick, onKick }: { ride: Ride; canKick: boolean; onK
             {canKick && (
               <button
                 onClick={() => onKick(m.user_id)}
-                className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 min-w-4.5 min-h-4.5 rounded-full bg-danger text-white text-[10px] leading-none items-center justify-center hidden group-hover:flex cursor-pointer"
+                className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 min-w-4.5 min-h-4.5 rounded-full bg-danger text-white text-[10px] leading-none flex items-center justify-center cursor-pointer"
                 aria-label={`请 ${m.profile.nickname} 下车`}
                 title="请下车"
               >
@@ -107,7 +114,7 @@ function RideCard({
 }) {
   const isDriver = ride.driver_id === userId
   const joined = isDriver || (ride.ride_members ?? []).some(m => m.user_id === userId)
-  const expired = ride.ride_date < todayStr()
+  const expired = isExpired(ride)
   const meta = STATUS_META[ride.status]
   const games = ride.game_ids.map(id => gameNames[id]).filter(Boolean)
   const canJoin = ride.status === 'recruiting' && !joined && !isFull(ride) && !expired
@@ -123,6 +130,9 @@ function RideCard({
               {fmtDate(ride.ride_date)} {hourLabel(ride.start_hour)} - {hourLabel(ride.end_hour)}
             </p>
             <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${meta.cls}`}>{meta.label}</span>
+            {expired && ride.status !== 'ended' && ride.status !== 'cancelled' && (
+              <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-bg-hover text-text-muted">已过期</span>
+            )}
             {isFull(ride) && ride.status === 'recruiting' && (
               <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-danger-dim text-danger">已满</span>
             )}
@@ -156,7 +166,9 @@ function RideCard({
           )}
           {isDriver && ride.status === 'recruiting' && (
             <>
-              <Button size="sm" disabled={busy} onClick={() => guard(() => updateRideStatus(ride.id, 'driving'))}>发车</Button>
+              {!expired && (
+                <Button size="sm" disabled={busy} onClick={() => guard(() => updateRideStatus(ride.id, 'driving'))}>发车</Button>
+              )}
               <Button size="sm" variant="ghost" disabled={busy}
                 onClick={() => guard(async () => {
                   if (!window.confirm('取消后车票全部作废，确定吗？')) return
@@ -201,7 +213,7 @@ function RideCard({
   )
 }
 
-function CreateRideForm({ currentId, guard, onDone }: { currentId: string; guard: (fn: () => Promise<void>) => Promise<void>; onDone: () => void }) {
+function CreateRideForm({ currentId, busy, guard, onDone }: { currentId: string; busy: boolean; guard: (fn: () => Promise<void>) => Promise<void>; onDone: () => void }) {
   const [date, setDate] = useState(todayStr())
   const [start, setStart] = useState(20)
   const [end, setEnd] = useState(24)
@@ -287,7 +299,7 @@ function CreateRideForm({ currentId, guard, onDone }: { currentId: string; guard
       />
 
       <div className="flex items-center gap-3">
-        <Button onClick={submit}>发车！</Button>
+        <Button onClick={submit} disabled={busy}>发车！</Button>
         <Button variant="ghost" onClick={onDone}>算了</Button>
       </div>
     </div>
@@ -337,9 +349,17 @@ export default function RidesPage() {
     }
   }
 
-  const all = rides ?? []
-  const open = all.filter(r => r.status === 'recruiting' || r.status === 'driving')
-  const history = all.filter(r => r.status === 'ended' || r.status === 'cancelled').slice(-8).reverse()
+  // 过期的开放车辆（司机忘了收/取消）沉到历史区，可在里面收尾
+  const { open, history } = useMemo(() => {
+    const all = rides ?? []
+    return {
+      open: all.filter(r => (r.status === 'recruiting' || r.status === 'driving') && !isExpired(r)),
+      history: all
+        .filter(r => r.status === 'ended' || r.status === 'cancelled' || isExpired(r))
+        .slice(-8)
+        .reverse(),
+    }
+  }, [rides])
 
   const grouped = useMemo(() => {
     const map = new Map<string, Ride[]>()
@@ -351,7 +371,9 @@ export default function RidesPage() {
     return Array.from(map.entries())
   }, [open])
 
-  const myActive = user ? all.some(r => r.driver_id === user.id || (r.ride_members ?? []).some(m => m.user_id === user.id)) : false
+  const myActive = user
+    ? open.some(r => r.driver_id === user.id || (r.ride_members ?? []).some(m => m.user_id === user.id))
+    : false
 
   return (
     <div className="page-wrap [--page-cap:56rem]">
@@ -368,7 +390,7 @@ export default function RidesPage() {
 
       {showForm && (
         <Card className="mb-8" eyebrow="New Ride" title="发一辆车">
-          <CreateRideForm currentId={currentId!} guard={guard} onDone={() => setShowForm(false)} />
+          <CreateRideForm currentId={currentId!} busy={busy} guard={guard} onDone={() => setShowForm(false)} />
         </Card>
       )}
 
