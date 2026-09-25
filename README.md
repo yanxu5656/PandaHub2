@@ -7,7 +7,7 @@
 和朋友们协调游戏时间、投票决定玩什么、管理共同游戏库 —— 一个安静的线上小屋。
 
 [![Live](https://img.shields.io/badge/Live-ph.156560.xyz-6cbf87?style=flat-square&logo=cloudflare&logoColor=white)](https://ph.156560.xyz)
-[![Version](https://img.shields.io/badge/version-v2.0.0-4d9e6a?style=flat-square)](https://github.com/yanxu5656/PandaHub2/releases/tag/v2.0.0)
+[![Version](https://img.shields.io/badge/version-v2.1.0-4d9e6a?style=flat-square)](https://github.com/yanxu5656/PandaHub2/releases/tag/v2.1.0)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?style=flat-square&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white)
@@ -37,6 +37,7 @@
 | **时间协调** | 周视图日历，按住拖拽框选空闲时段；竹绿热力图叠加全员时间，高亮共同空闲区间 |
 | **投票** | 发起"今晚玩什么"，一人一票、实时计票、支持截止时间，详情页展示各选项占比 |
 | **游戏库** | 手动添加游戏，多分类标签（预设 12 类 + 自定义分类），按分类分组展示，一键标记"我也有"，自动汇总多人共有的游戏 |
+| **开黑约车** | 选一个日期时段 + 多选想玩的游戏发一辆"车"，圈内其他人可一键上车；支持设车位上限（含司机，满员即止），司机发车 / 收车 / 请人下车，管理员可介入；发车时全圈推送通知，Realtime 实时刷新座位 |
 | **设置** | 昵称与头像（emoji）管理，`user_metadata` 与 `profiles` 双源同步 |
 | **认证** | 邮箱注册 / 登录，注册时 Trigger 自动建档，JWT 会话 |
 
@@ -110,10 +111,11 @@ circles ── circle_members ── profiles（两级角色：platform_role 平
     ├─ votes ── vote_records   （投票 & 记票）
     ├─ games ── game_owners    （谁拥有什么游戏）
     ├─ game_sessions    （井字棋 / 五子棋实时对局）
+    ├─ rides ── ride_members   （开黑车 & 乘客座位）
     └─ notifications    （站内通知）
 ```
 
-所有表启用 RLS：全部内容按 `circle_id` 作用域隔离，写操作限本圈成员；删除类操作限圈主/管理员（security definer RPC 承担建圈 / 踢人 / 转让等敏感动作）。迁移脚本见 [`supabase/migrations/`](./supabase/migrations)（001 基础 → 004 多圈子）。
+所有表启用 RLS：全部内容按 `circle_id` 作用域隔离，写操作限本圈成员；删除类操作限圈主/管理员（security definer RPC 承担建圈 / 踢人 / 转让 / 发车 / 上车等敏感动作）。迁移脚本见 [`supabase/migrations/`](./supabase/migrations)（001 基础 → 004 多圈子 → 005 开黑车）。
 
 ---
 
@@ -137,7 +139,7 @@ VITE_SUPABASE_URL=https://<your-project>.supabase.co
 VITE_SUPABASE_ANON_KEY=<your-anon-key>
 ```
 
-数据库初始化：在 Supabase SQL Editor 中依次执行 `supabase/migrations/` 下的 001 → 004（004 为 v2 多圈子迁移，幂等可重复执行）。
+数据库初始化：在 Supabase SQL Editor 中依次执行 `supabase/migrations/` 下的 001 → 005（004 为 v2 多圈子迁移，005 为开黑车，均幂等可重复执行）。
 
 ## ✦ 部署
 
@@ -160,7 +162,7 @@ src/
 ├── lib/
 │   ├── supabase.ts    客户端初始化
 │   └── services.ts    数据服务层（所有数据库操作）
-├── pages/             lobby · schedule · votes · games · settings · auth · minigames
+├── pages/             lobby · schedule · votes · games · rides · settings · auth · minigames
 ├── stores/            authStore（Zustand）
 ├── index.css          设计令牌 @theme + 全局质感样式
 └── App.tsx            路由表

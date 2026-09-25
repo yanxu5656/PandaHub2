@@ -13,6 +13,7 @@ import VotesPage from '@/pages/votes/VotesPage'
 import VoteDetailPage from '@/pages/votes/VoteDetailPage'
 import GamesPage from '@/pages/games/GamesPage'
 import MiniGamesPage from '@/pages/minigames/MiniGamesPage'
+import RidesPage from '@/pages/rides/RidesPage'
 import CircleSettingsPage from '@/pages/circle/CircleSettingsPage'
 import JoinCirclePage from '@/pages/circle/JoinCirclePage'
 import SettingsPage from '@/pages/settings/SettingsPage'
@@ -63,6 +64,7 @@ function AppRoutes() {
         <Route path="votes/:id" element={<VoteDetailPage />} />
         <Route path="games" element={<GamesPage />} />
         <Route path="minigames" element={<MiniGamesPage />} />
+        <Route path="rides" element={<RidesPage />} />
         <Route path="circle" element={<CircleSettingsPage />} />
         <Route path="join" element={<JoinCirclePage />} />
         <Route path="join/:code" element={<JoinCirclePage />} />

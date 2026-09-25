@@ -11,6 +11,7 @@ const navItems = [
   { path: '/votes', label: '投票', en: 'Votes', icon: VoteIcon },
   { path: '/games', label: '游戏库', en: 'Games', icon: GamesIcon },
   { path: '/minigames', label: '小游戏', en: 'Arcade', icon: MiniGameIcon },
+  { path: '/rides', label: '开黑车', en: 'Rides', icon: CarIcon },
   { path: '/circle', label: '圈子设置', en: 'Circle', icon: CircleIcon },
   { path: '/settings', label: '设置', en: 'Settings', icon: SettingsIcon },
 ]
@@ -63,6 +64,17 @@ function MiniGameIcon() {
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <polygon points="10 8 16 12 10 16 10 8" />
+    </svg>
+  )
+}
+
+function CarIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11" />
+      <path d="M3 11h18v6a1 1 0 0 1-1 1h-1.5a1 1 0 0 1-1-1v-1H6.5v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+      <circle cx="7" cy="14" r="0.5" />
+      <circle cx="17" cy="14" r="0.5" />
     </svg>
   )
 }

@@ -589,6 +589,100 @@ export async function deleteGameSession(id: string) {
 }
 
 // ============================================================
+// Rides (开黑车)
+// ============================================================
+
+export interface RideMember {
+  user_id: string
+  joined_at: string
+  profile?: Profile
+}
+
+export interface Ride {
+  id: string
+  circle_id: string
+  driver_id: string
+  ride_date: string   // 'YYYY-MM-DD'
+  start_hour: number
+  end_hour: number
+  game_ids: string[]
+  capacity: number    // 总座位数（含司机），0 = 不限
+  note: string | null
+  status: 'recruiting' | 'driving' | 'ended' | 'cancelled'
+  created_at: string
+  updated_at: string
+  driver?: Profile
+  ride_members?: RideMember[]
+}
+
+export async function getRides(circleId: string): Promise<Ride[]> {
+  const { data, error } = await supabase
+    .from('rides')
+    .select(`
+      *,
+      driver:profiles!rides_driver_id_fkey(*),
+      ride_members(user_id, joined_at, profile:profiles!ride_members_user_id_fkey(*))
+    `)
+    .eq('circle_id', circleId)
+    .order('ride_date', { ascending: true })
+    .order('start_hour', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export async function createRide(
+  circleId: string,
+  opts: { date: string; startHour: number; endHour: number; gameIds: string[]; capacity: number; note?: string },
+): Promise<string> {
+  const { data, error } = await supabase.rpc('create_ride', {
+    p_circle_id: circleId,
+    p_date: opts.date,
+    p_start: opts.startHour,
+    p_end: opts.endHour,
+    p_games: opts.gameIds,
+    p_capacity: opts.capacity,
+    p_note: opts.note ?? null,
+  })
+  if (error) throw error
+  return data as string
+}
+
+export async function joinRide(rideId: string) {
+  const { error } = await supabase.rpc('join_ride', { p_ride_id: rideId })
+  if (error) throw error
+}
+
+export async function leaveRide(rideId: string) {
+  const { error } = await supabase.rpc('leave_ride', { p_ride_id: rideId })
+  if (error) throw error
+}
+
+export async function kickRideMember(rideId: string, userId: string) {
+  const { error } = await supabase.rpc('kick_ride_member', { p_ride_id: rideId, p_uid: userId })
+  if (error) throw error
+}
+
+export async function updateRideStatus(rideId: string, status: Ride['status']) {
+  const { data, error } = await supabase
+    .from('rides')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', rideId)
+    .select('id')
+  if (error) throw error
+  if (!data?.length) throw new Error('操作失败：无权限')
+}
+
+export async function deleteRide(rideId: string) {
+  const { data, error } = await supabase
+    .from('rides')
+    .delete()
+    .eq('id', rideId)
+    .select('id')
+  if (error) throw error
+  if (!data?.length) throw new Error('删除失败：无权限')
+}
+
+// ============================================================
 // Notifications
 // ============================================================
 
