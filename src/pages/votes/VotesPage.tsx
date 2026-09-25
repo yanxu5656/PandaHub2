@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import PandaFace from '@/components/ui/PandaFace'
-import { getVotes, createVote, getGames, type Vote } from '@/lib/services'
+import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
+import { getVotes, createVote, deleteVote, getGames, type Vote } from '@/lib/services'
 
 const filters = [
   { key: 'active', label: '进行中' },
@@ -15,10 +16,12 @@ const filters = [
 export default function VotesPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [filter, setFilter] = useState<'active' | 'closed' | 'all'>('active')
+  const currentId = useCircleStore(s => s.currentId)
 
   const { data: votes, isLoading, refetch } = useQuery({
-    queryKey: ['votes', filter],
-    queryFn: () => (filter === 'all' ? getVotes() : getVotes(filter)),
+    queryKey: ['votes', currentId, filter],
+    queryFn: () => (filter === 'all' ? getVotes(currentId!) : getVotes(currentId!, filter)),
+    enabled: !!currentId,
   })
 
   return (
@@ -75,6 +78,10 @@ export default function VotesPage() {
 }
 
 function VoteRow({ vote }: { vote: Vote }) {
+  const queryClient = useQueryClient()
+  const [deleting, setDeleting] = useState(false)
+  const [delError, setDelError] = useState('')
+  const admin = isCircleAdmin()
   const totalVotes = vote.records?.length ?? 0
   const isExpired = vote.expires_at && new Date(vote.expires_at) < new Date() && vote.status === 'active'
 
@@ -83,6 +90,23 @@ function VoteRow({ vote }: { vote: Vote }) {
       ? { label: '已过期', cls: 'bg-danger-dim text-danger' }
       : { label: '进行中', cls: 'bg-success/12 text-success' }
     : { label: '已结束', cls: 'bg-bg-hover text-text-muted' }
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!window.confirm(`确定删除投票「${vote.title}」？`)) return
+    setDeleting(true)
+    setDelError('')
+    try {
+      await deleteVote(vote.id)
+      queryClient.invalidateQueries({ queryKey: ['votes'] })
+    } catch (err: any) {
+      setDelError(err?.message ?? '删除失败')
+      setTimeout(() => setDelError(''), 4000)
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
     <Link
@@ -101,6 +125,7 @@ function VoteRow({ vote }: { vote: Vote }) {
               </span>
             )}
           </p>
+          {delError && <p className="text-sm text-danger mt-2">{delError}</p>}
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <span className={`px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 ${statusStyle.cls}`}>
@@ -108,6 +133,20 @@ function VoteRow({ vote }: { vote: Vote }) {
             {statusStyle.label}
           </span>
           <span className="text-sm text-text-secondary num"><span className="font-display text-lg text-accent-deep not-italic">{totalVotes}</span> 票</span>
+          {admin && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              aria-label="删除投票"
+              title="删除投票"
+              className="p-2 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
       <div className="flex flex-wrap gap-2 mt-4">
@@ -122,13 +161,18 @@ function VoteRow({ vote }: { vote: Vote }) {
 }
 
 function CreateForm({ onCreated }: { onCreated: () => void }) {
+  const currentId = useCircleStore(s => s.currentId)
   const [title, setTitle] = useState('')
   const [options, setOptions] = useState(['', ''])
   const [expiresAt, setExpiresAt] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const { data: games } = useQuery({ queryKey: ['games'], queryFn: getGames })
+  const { data: games } = useQuery({
+    queryKey: ['games', currentId],
+    queryFn: () => getGames(currentId!),
+    enabled: !!currentId,
+  })
 
   const addOption = () => setOptions(prev => [...prev, ''])
   const removeOption = (i: number) => setOptions(prev => prev.filter((_, idx) => idx !== i))
@@ -157,7 +201,7 @@ function CreateForm({ onCreated }: { onCreated: () => void }) {
     setError('')
     try {
       const expires = expiresAt ? new Date(expiresAt).toISOString() : undefined
-      await createVote(title.trim(), validOptions, expires)
+      await createVote(currentId!, title.trim(), validOptions, expires)
       setTitle('')
       setOptions(['', ''])
       setExpiresAt('')

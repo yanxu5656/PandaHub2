@@ -2,10 +2,12 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import { useAuthStore } from '@/stores/authStore'
+import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
 import {
   getAllSchedules,
-  getAllProfiles,
+  getCircleMembers,
   upsertSchedule,
+  deleteMemberSchedule,
   getWeekStart,
   type Profile,
   type Schedule,
@@ -52,11 +54,14 @@ function getSlotAvatars(
 
 export default function SchedulePage() {
   const { user } = useAuthStore()
+  const currentId = useCircleStore(s => s.currentId)
   const queryClient = useQueryClient()
   const [weekOffset, setWeekOffset] = useState(0)
   const [dragMode, setDragMode] = useState<'add' | 'remove' | null>(null)
   const [draft, setDraft] = useState<Record<string, boolean> | null>(null)
   const [saveError, setSaveError] = useState('')
+  const admin = isCircleAdmin()
+  const [clearMsg, setClearMsg] = useState('')
 
   const weekStart = useMemo(() => {
     const base = new Date()
@@ -73,19 +78,26 @@ export default function SchedulePage() {
   }, [weekStart])
 
   const { data: allSchedules, isLoading } = useQuery({
-    queryKey: ['schedules', weekStart],
-    queryFn: () => getAllSchedules(weekStart),
+    queryKey: ['schedules', currentId, weekStart],
+    queryFn: () => getAllSchedules(currentId!, weekStart),
+    enabled: !!currentId,
   })
 
-  const { data: profiles } = useQuery({
-    queryKey: ['profiles'],
-    queryFn: getAllProfiles,
+  const { data: members } = useQuery({
+    queryKey: ['circle-members', currentId],
+    queryFn: () => getCircleMembers(currentId!),
+    enabled: !!currentId,
   })
+
+  const profiles: Profile[] = useMemo(
+    () => (members ?? []).map(m => m.profile!).filter(Boolean),
+    [members],
+  )
 
   const { data: mySchedule } = useQuery({
-    queryKey: ['my-schedule', weekStart, user?.id],
-    queryFn: () => (user ? getAllSchedules(weekStart).then(s => s.find(sch => sch.user_id === user.id) ?? null) : null),
-    enabled: !!user,
+    queryKey: ['my-schedule', currentId, weekStart, user?.id],
+    queryFn: () => (user ? getAllSchedules(currentId!, weekStart).then(s => s.find(sch => sch.user_id === user.id) ?? null) : null),
+    enabled: !!user && !!currentId,
   })
 
   const serverSlots = useMemo(() => mySchedule?.slots ?? {}, [mySchedule])
@@ -117,7 +129,7 @@ export default function SchedulePage() {
   }, [allSchedules])
 
   const totalMembers = allSchedules?.length ?? 0
-  const totalProfiles = profiles?.length ?? 0
+  const totalProfiles = profiles.length
 
   useEffect(() => {
     const onWindowMouseUp = async () => {
@@ -125,15 +137,15 @@ export default function SchedulePage() {
       draggingRef.current = false
       setDragMode(null)
       const d = draftRef.current
-      if (!user || !d) return
+      if (!user || !currentId || !d) return
       try {
-        await upsertSchedule(user.id, weekStart, d)
+        await upsertSchedule(user.id, currentId, weekStart, d)
         setSaveError('')
-        queryClient.setQueryData<Schedule | null>(['my-schedule', weekStart, user.id], old =>
-          old ? { ...old, slots: d } : { id: crypto.randomUUID(), user_id: user.id, week_start: weekStart, slots: d, updated_at: new Date().toISOString() },
+        queryClient.setQueryData<Schedule | null>(['my-schedule', currentId, weekStart, user.id], old =>
+          old ? { ...old, slots: d } : { id: crypto.randomUUID(), user_id: user.id, circle_id: currentId, week_start: weekStart, slots: d, updated_at: new Date().toISOString() },
         )
-        queryClient.invalidateQueries({ queryKey: ['schedules', weekStart] })
-        queryClient.invalidateQueries({ queryKey: ['my-schedule', weekStart] })
+        queryClient.invalidateQueries({ queryKey: ['schedules', currentId, weekStart] })
+        queryClient.invalidateQueries({ queryKey: ['my-schedule', currentId, weekStart] })
       } catch (err) {
         console.error('Failed to update schedule:', err)
         setSaveError('时段保存失败（网络或权限问题），本次勾选未生效，请重试')
@@ -144,7 +156,7 @@ export default function SchedulePage() {
     }
     window.addEventListener('mouseup', onWindowMouseUp)
     return () => window.removeEventListener('mouseup', onWindowMouseUp)
-  }, [user, weekStart, queryClient])
+  }, [user, currentId, weekStart, queryClient])
 
   const handleMouseDown = (day: number, hour: number) => {
     if (!user) return
@@ -179,7 +191,7 @@ export default function SchedulePage() {
       for (const hour of HOURS) {
         const key = getSlotKey(day, hour)
         if ((overlapCount[key] ?? 0) < 2) continue
-        const people = getSlotAvatars(key, allSchedules ?? [], profiles ?? [], user?.id)
+        const people = getSlotAvatars(key, allSchedules ?? [], profiles, user?.id)
           .map(p => p.nickname)
           .sort()
         const last = merged[merged.length - 1]
@@ -194,6 +206,20 @@ export default function SchedulePage() {
     merged.sort((a, b) => b.people.length - a.people.length || a.day - b.day || a.startHour - b.startHour)
     return merged.slice(0, 8)
   }, [overlapCount, allSchedules, profiles, user?.id])
+
+  const handleClearMember = async (userId: string, nickname: string) => {
+    if (!currentId) return
+    if (!window.confirm(`确定清除「${nickname}」本周的时间安排？`)) return
+    setClearMsg('')
+    try {
+      await deleteMemberSchedule(currentId, userId, weekStart)
+      queryClient.invalidateQueries({ queryKey: ['schedules', currentId, weekStart] })
+      queryClient.invalidateQueries({ queryKey: ['my-schedule', currentId, weekStart] })
+    } catch (err: any) {
+      setClearMsg(err?.message ?? '清除失败')
+      setTimeout(() => setClearMsg(''), 4000)
+    }
+  }
 
   return (
     <div className="page-wrap">
@@ -268,7 +294,7 @@ export default function SchedulePage() {
                       const isMine = !!mySlots[key]
                       const count = overlapCount[key] ?? 0
                       const intensity = totalMembers > 0 ? count / totalMembers : 0
-                      const avatars = getSlotAvatars(key, allSchedules ?? [], profiles ?? [], user?.id)
+                      const avatars = getSlotAvatars(key, allSchedules ?? [], profiles, user?.id)
 
                       let bgClass = 'bg-bg-card/60'
                       if (isMine) {
@@ -372,6 +398,31 @@ export default function SchedulePage() {
           </div>
         )}
       </Card>
+
+      {/* 管理员：成员本周时间管理 */}
+      {admin && (allSchedules?.length ?? 0) > 0 && (
+        <Card className="mt-8" eyebrow="Member Hours" title="成员本周时间（管理员）">
+          {clearMsg && <div className="mb-4 px-4 py-2.5 rounded-lg bg-danger-dim text-danger text-sm">{clearMsg}</div>}
+          <div className="divide-y divide-hairline">
+            {allSchedules!.map(s => {
+              const p = profiles.find(pr => pr.id === s.user_id)
+              const slotCount = Object.values(s.slots).filter(Boolean).length
+              return (
+                <div key={s.id} className="flex items-center gap-4 py-3">
+                  <span className="flex-1 text-[15px] font-medium truncate min-w-0">{p?.nickname ?? '未知用户'}</span>
+                  <span className="text-sm text-text-muted num shrink-0">{slotCount} 个时段</span>
+                  <button
+                    onClick={() => handleClearMember(s.user_id, p?.nickname ?? '该成员')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-danger bg-danger-dim hover:bg-danger/20 transition-colors cursor-pointer shrink-0"
+                  >
+                    清除本周
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+      )}
     </div>
   )
 }

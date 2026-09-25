@@ -4,6 +4,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import PandaFace from '@/components/ui/PandaFace'
 import { useAuthStore } from '@/stores/authStore'
+import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
 import {
   getGames,
   addGame,
@@ -31,6 +32,8 @@ function GameCard({
   currentUserId: string | undefined
   onRefresh: () => void
 }) {
+  const currentId = useCircleStore(s => s.currentId)
+  const admin = isCircleAdmin()
   const isOwner = game.owners?.some(o => o.id === currentUserId) ?? false
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(game.name)
@@ -67,7 +70,8 @@ function GameCard({
   }
 
   const handleClaim = async () => {
-    await claimGame(game.id)
+    if (!currentId) return
+    await claimGame(currentId, game.id)
     onRefresh()
   }
 
@@ -78,8 +82,12 @@ function GameCard({
 
   const handleDelete = async () => {
     if (!confirm('确定删除这个游戏？')) return
-    await deleteGame(game.id)
-    onRefresh()
+    try {
+      await deleteGame(game.id)
+      onRefresh()
+    } catch (err: any) {
+      alert(err.message ?? '删除失败')
+    }
   }
 
   if (editing) {
@@ -136,16 +144,18 @@ function GameCard({
               <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
             </svg>
           </button>
-          <button
-            onClick={handleDelete}
-            className="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer"
-            title="删除"
-            aria-label={`删除 ${game.name}`}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
-          </button>
+          {admin && (
+            <button
+              onClick={handleDelete}
+              className="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer"
+              title="删除"
+              aria-label={`删除 ${game.name}`}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
@@ -199,6 +209,7 @@ function GameCard({
 }
 
 function AddGameForm({ onAdded }: { onAdded: () => void }) {
+  const currentId = useCircleStore(s => s.currentId)
   const [name, setName] = useState('')
   const [genres, setGenres] = useState<string[]>([])
   const [customGenre, setCustomGenre] = useState('')
@@ -225,7 +236,7 @@ function AddGameForm({ onAdded }: { onAdded: () => void }) {
     setLoading(true)
     setError('')
     try {
-      await addGame(name.trim(), undefined, undefined, genres)
+      await addGame(currentId!, name.trim(), undefined, undefined, genres)
       setName('')
       setGenres([])
       onAdded()
@@ -301,11 +312,13 @@ function AddGameForm({ onAdded }: { onAdded: () => void }) {
 
 export default function GamesPage() {
   const { user } = useAuthStore()
+  const currentId = useCircleStore(s => s.currentId)
   const [showAdd, setShowAdd] = useState(false)
 
   const { data: games, isLoading, refetch } = useQuery({
-    queryKey: ['games'],
-    queryFn: getGames,
+    queryKey: ['games', currentId],
+    queryFn: () => getGames(currentId!),
+    enabled: !!currentId,
   })
 
   const allGames = games ?? []

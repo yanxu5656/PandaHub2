@@ -3,14 +3,16 @@ import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'
 import { useAuthStore } from '@/stores/authStore'
+import { useCircleStore } from '@/stores/circleStore'
 import { useRealtime } from '@/hooks/useRealtime'
 import {
-  getAllProfiles,
+  getCircleMembers,
   getOnlineUserIds,
   getNotifications,
   getVotes,
   markAllNotificationsRead,
   type Profile,
+  type CircleRole,
   type Notification,
   type Vote,
 } from '@/lib/services'
@@ -78,9 +80,10 @@ function Avatar({ profile, size = 'md' }: { profile: Profile; size?: 'sm' | 'md'
   )
 }
 
-function MemberRow({ profile, isOnline }: { profile: Profile; isOnline: boolean }) {
+const CIRCLE_ROLE_LABEL: Record<CircleRole, string> = { owner: '圈主', admin: '管理员', member: '成员' }
+
+function MemberRow({ profile, isOnline, role }: { profile: Profile; isOnline: boolean; role: CircleRole }) {
   const { user } = useAuthStore()
-  const isAdmin = profile.role === 'admin'
   const isMe = profile.id === user?.id
 
   return (
@@ -99,8 +102,10 @@ function MemberRow({ profile, isOnline }: { profile: Profile; isOnline: boolean 
         </p>
         <p className="text-xs text-text-muted mt-0.5">{isOnline ? '在线' : '离线'}</p>
       </div>
-      {isAdmin && (
-        <span className="px-2.5 py-1 rounded-lg text-xs bg-accent-dim text-accent-deep font-medium">管理员</span>
+      {role !== 'member' && (
+        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${role === 'owner' ? 'bg-blush-dim text-blush-deep' : 'bg-accent-dim text-accent-deep'}`}>
+          {CIRCLE_ROLE_LABEL[role]}
+        </span>
       )}
     </div>
   )
@@ -113,6 +118,9 @@ function NotificationItem({ notification }: { notification: Notification }) {
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-linear-to-b from-accent-hover to-accent-deep" />
       )}
       <p className={`leading-relaxed ${notification.is_read ? 'text-text-secondary' : 'text-text-primary font-medium'} text-[15px]`}>
+        {notification.circle?.name && (
+          <span className="text-accent-deep font-medium">【{notification.circle.name}】</span>
+        )}
         {notification.content}
       </p>
       <p className="text-sm text-text-muted mt-1.5 num">{new Date(notification.created_at).toLocaleDateString('zh-CN')}</p>
@@ -145,7 +153,9 @@ function StatTile({ label, value, accent }: { label: string; value: number; acce
 
 export default function LobbyPage() {
   const { user } = useAuthStore()
+  const { currentId, circles } = useCircleStore()
   const queryClient = useQueryClient()
+  const circle = circles.find(c => c.id === currentId) ?? null
 
   useRealtime('presence', '*', () => {
     queryClient.invalidateQueries({ queryKey: ['online'] })
@@ -159,9 +169,14 @@ export default function LobbyPage() {
     queryClient.invalidateQueries({ queryKey: ['votes'] })
   })
 
-  const { data: profiles, isLoading: loadingProfiles } = useQuery({
-    queryKey: ['profiles'],
-    queryFn: getAllProfiles,
+  useRealtime('circle_members', '*', () => {
+    queryClient.invalidateQueries({ queryKey: ['circle-members', currentId] })
+  })
+
+  const { data: members, isLoading: loadingProfiles } = useQuery({
+    queryKey: ['circle-members', currentId],
+    queryFn: () => getCircleMembers(currentId!),
+    enabled: !!currentId,
   })
 
   const { data: onlineIds } = useQuery({
@@ -176,10 +191,15 @@ export default function LobbyPage() {
   })
 
   const { data: activeVotes } = useQuery({
-    queryKey: ['votes', 'active'],
-    queryFn: () => getVotes('active'),
+    queryKey: ['votes', currentId, 'active'],
+    queryFn: () => getVotes(currentId!, 'active'),
+    enabled: !!currentId,
   })
 
+  const memberProfiles = (members ?? []).map(m => m.profile!).filter(Boolean)
+  const onlineMemberIds = (members ?? [])
+    .map(m => m.user_id)
+    .filter(id => onlineIds?.includes(id) ?? false)
   const unreadCount = notifications?.filter(n => !n.is_read).length ?? 0
   const liveVotes = (activeVotes ?? []).filter(
     v => !v.expires_at || new Date(v.expires_at) >= new Date(),
@@ -199,7 +219,7 @@ export default function LobbyPage() {
     <div className="page-wrap">
       {/* Editorial header */}
       <header className="mb-10 animate-fade-up">
-        <p className="eyebrow mb-3">{g.en} · {dateLine}</p>
+        <p className="eyebrow mb-3">{g.en} · {dateLine}{circle ? ` · ${circle.name}` : ''}</p>
         <h1 className="text-4xl lg:text-5xl 3xl:text-6xl font-semibold tracking-tight leading-tight">
           {g.zh}，<span className="gold-text font-display text-5xl lg:text-6xl 3xl:text-7xl italic tracking-normal">{nickname}</span>
         </h1>
@@ -209,10 +229,10 @@ export default function LobbyPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
         <div className="animate-fade-up" style={{ animationDelay: '60ms' }}>
-          <StatTile label="在线" value={onlineIds?.length ?? 0} accent />
+          <StatTile label="在线" value={onlineMemberIds.length} accent />
         </div>
         <div className="animate-fade-up" style={{ animationDelay: '120ms' }}>
-          <StatTile label="成员" value={profiles?.length ?? 0} />
+          <StatTile label="成员" value={memberProfiles.length} />
         </div>
         <div className="animate-fade-up" style={{ animationDelay: '180ms' }}>
           <StatTile label="进行中投票" value={liveVotes.length} />
@@ -230,7 +250,7 @@ export default function LobbyPage() {
             eyebrow="Members"
             action={
               <span className="text-sm text-text-secondary">
-                <span className="num text-success font-medium">{onlineIds?.length ?? 0}</span> 在线 / <span className="num">{profiles?.length ?? 0}</span> 成员
+                <span className="num text-success font-medium">{onlineMemberIds.length}</span> 在线 / <span className="num">{memberProfiles.length}</span> 成员
               </span>
             }
           >
@@ -245,8 +265,13 @@ export default function LobbyPage() {
               </div>
             ) : (
               <div className="divide-y divide-hairline">
-                {profiles?.map(p => (
-                  <MemberRow key={p.id} profile={p} isOnline={onlineIds?.includes(p.id) ?? false} />
+                {members?.map(m => (
+                  <MemberRow
+                    key={m.user_id}
+                    profile={m.profile!}
+                    role={m.role}
+                    isOnline={onlineIds?.includes(m.user_id) ?? false}
+                  />
                 ))}
               </div>
             )}

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useAuthStore } from '@/stores/authStore'
+import { isCircleAdmin } from '@/stores/circleStore'
 import { useRealtime } from '@/hooks/useRealtime'
 import { getVoteById, submitVote, closeVote } from '@/lib/services'
 
@@ -119,7 +120,7 @@ export default function VoteDetailPage() {
           </div>
           <div className="flex flex-col items-end gap-3 shrink-0">
             <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${statusStyle.cls}`}>{statusStyle.label}</span>
-            {vote.status === 'active' && user?.id === vote.creator_id && (
+            {vote.status === 'active' && (user?.id === vote.creator_id || isCircleAdmin()) && (
               <Button variant="danger" size="sm" onClick={handleClose} disabled={submitting}>结束投票</Button>
             )}
           </div>

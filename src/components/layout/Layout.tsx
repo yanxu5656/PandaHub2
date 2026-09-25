@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { useCircleStore } from '@/stores/circleStore'
 import { updatePresence } from '@/lib/services'
 import PandaFace from '@/components/ui/PandaFace'
 
@@ -10,8 +11,11 @@ const navItems = [
   { path: '/votes', label: '投票', en: 'Votes', icon: VoteIcon },
   { path: '/games', label: '游戏库', en: 'Games', icon: GamesIcon },
   { path: '/minigames', label: '小游戏', en: 'Arcade', icon: MiniGameIcon },
+  { path: '/circle', label: '圈子设置', en: 'Circle', icon: CircleIcon },
   { path: '/settings', label: '设置', en: 'Settings', icon: SettingsIcon },
 ]
+
+const ROLE_LABEL: Record<string, string> = { owner: '圈主', admin: '管理员', member: '成员' }
 
 function HomeIcon() {
   return (
@@ -63,6 +67,17 @@ function MiniGameIcon() {
   )
 }
 
+function CircleIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="7" r="3" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+      <path d="M16 15.5a4.5 4.5 0 0 1 5.5 4.5" />
+    </svg>
+  )
+}
+
 function SettingsIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -74,14 +89,22 @@ function SettingsIcon() {
 
 export default function Layout() {
   const { user, signOut } = useAuthStore()
+  const { circles, currentId, platformRole, loaded, load, setCurrent } = useCircleStore()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [switcherOpen, setSwitcherOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
 
   const closeSidebar = () => setSidebarOpen(false)
 
   useEffect(() => {
     closeSidebar()
   }, [location.pathname])
+
+  // 加载我的圈子（登录后一次）
+  useEffect(() => {
+    if (user?.id) load(user.id)
+  }, [user?.id, load])
 
   // 在线心跳：进入任意页面即上报，之后每 2 分钟一次（在线判定阈值 5 分钟）
   useEffect(() => {
@@ -92,14 +115,85 @@ export default function Layout() {
     return () => clearInterval(timer)
   }, [user])
 
+  const current = circles.find(c => c.id === currentId) ?? null
   const userAvatar = user?.user_metadata?.avatar_url
   const userIsEmoji = userAvatar && !userAvatar.startsWith('http')
   const userInitial = user?.user_metadata?.nickname?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? '?'
 
+  const switchCircle = (id: string) => {
+    setCurrent(id)
+    setSwitcherOpen(false)
+    navigate('/')
+  }
+
+  const circleSwitcher = (
+    <div className="px-4 pb-2 shrink-0 relative">
+      <button
+        onClick={() => setSwitcherOpen(o => !o)}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-accent-dim/60 border border-accent/20 hover:bg-accent-dim transition-colors cursor-pointer text-left"
+        aria-label="切换圈子"
+        aria-expanded={switcherOpen}
+      >
+        <span className="w-8 h-8 rounded-full bg-linear-to-br from-accent-hover to-accent-deep text-white flex items-center justify-center text-sm font-bold shrink-0">
+          {current?.name?.[0] ?? '?'}
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-[15px] font-bold text-accent-deep truncate">{current?.name ?? '选择圈子'}</span>
+          <span className="block text-xs text-text-muted mt-0.5">
+            {current ? ROLE_LABEL[current.my_role] : '未加入圈子'}
+          </span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-accent-deep transition-transform duration-200 ${switcherOpen ? 'rotate-180' : ''}`}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {switcherOpen && (
+        <div className="absolute left-4 right-4 top-full mt-2 z-30 rounded-2xl bg-white border border-white/90 shadow-[0_12px_40px_rgba(83,96,83,0.22)] overflow-hidden animate-fade-in">
+          <div className="max-h-64 overflow-auto py-1.5">
+            {circles.map(c => (
+              <button
+                key={c.id}
+                onClick={() => switchCircle(c.id)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors cursor-pointer ${
+                  c.id === currentId ? 'bg-accent-dim' : 'hover:bg-bg-hover'
+                }`}
+              >
+                <span className="w-7 h-7 rounded-full bg-bg-hover ring-1 ring-hairline flex items-center justify-center text-xs font-bold text-accent-deep shrink-0">
+                  {c.name?.[0] ?? '?'}
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm font-medium truncate">{c.name}</span>
+                  <span className="block text-xs text-text-muted">{ROLE_LABEL[c.my_role]}</span>
+                </span>
+                {c.id === currentId && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent-deep shrink-0">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="border-t border-hairline p-1.5">
+            <button
+              onClick={() => { setSwitcherOpen(false); navigate('/join') }}
+              className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-text-secondary hover:text-accent-deep hover:bg-bg-hover transition-colors cursor-pointer"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              {(platformRole === 'super' || platformRole === 'creator') ? '加入 / 创建圈子' : '用邀请码加入圈子'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="pt-8 pb-6 px-7 shrink-0">
+      <div className="pt-8 pb-4 px-7 shrink-0">
         <div className="flex items-center gap-3 group cursor-default">
           <div className="transition-transform duration-300 group-hover:animate-[wiggle_0.6s_ease-in-out_infinite]">
             <PandaFace size={40} />
@@ -110,8 +204,10 @@ export default function Layout() {
         </div>
       </div>
 
+      {circleSwitcher}
+
       {/* Nav */}
-      <nav className="flex-1 pt-5 pb-4 px-4 space-y-3 overflow-auto">
+      <nav className="flex-1 pt-3 pb-4 px-4 space-y-3 overflow-auto">
         {navItems.map((item, i) => (
           <NavLink
             key={item.path}
@@ -219,7 +315,30 @@ export default function Layout() {
         </div>
 
         <main className="flex-1 overflow-auto">
-          <Outlet />
+          {!loaded ? (
+            <div className="h-full flex flex-col items-center justify-center gap-5">
+              <div className="animate-bounce"><PandaFace size={56} /></div>
+              <p className="text-text-secondary font-display tracking-widest">加载圈子中...</p>
+            </div>
+          ) : !currentId && location.pathname !== '/join' ? (
+            <div className="h-full flex flex-col items-center justify-center gap-6 px-6 text-center">
+              <PandaFace size={72} />
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">你还没有加入任何圈子</h2>
+                <p className="text-text-secondary mt-2 max-w-sm">
+                  圈子是独立的小窝 —— 各自的成员、时间表、投票和游戏库。用邀请码加入一个，或联系圈主拉你进去。
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/join')}
+                className="px-7 py-3 rounded-full text-[15px] font-bold cursor-pointer bg-linear-to-b from-accent-hover to-accent-deep text-white shadow-[0_4px_14px_rgba(108,191,135,0.35)] hover:brightness-105 active:translate-y-px transition-all"
+              >
+                用邀请码加入圈子
+              </button>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
     </div>

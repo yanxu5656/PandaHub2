@@ -1,19 +1,42 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useAuthStore } from '@/stores/authStore'
-import { updateProfile } from '@/lib/services'
+import { useCircleStore } from '@/stores/circleStore'
+import { updateProfile, getAllProfiles, setPlatformRole } from '@/lib/services'
 
 const avatarOptions = ['🐼', '🐻', '🐲', '🦊', '🐰', '🐱', '🐶', '🐴', '🐵', '🐷', '🐸', '🐯', '🦁', '🐮', '🐔', '🐧', '🦄', '🐝', '🐳', '🦋', '🐙', '🦀', '🐢', '🦉']
 
 export default function SettingsPage() {
   const { user, updateProfile: updateAuthProfile } = useAuthStore()
+  const { platformRole } = useCircleStore()
   const queryClient = useQueryClient()
   const [nickname, setNickname] = useState(user?.user_metadata?.nickname ?? '')
   const [avatar, setAvatar] = useState(user?.user_metadata?.avatar_url ?? '')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [platformMsg, setPlatformMsg] = useState('')
+
+  const isSuper = platformRole === 'super'
+
+  const { data: allProfiles } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: getAllProfiles,
+    enabled: isSuper,
+  })
+
+  const handleToggleCreator = async (targetId: string, next: 'creator' | null) => {
+    setPlatformMsg('')
+    try {
+      await setPlatformRole(targetId, next)
+      await queryClient.invalidateQueries({ queryKey: ['profiles'] })
+      setPlatformMsg(next ? '已授予建圈资格' : '已取消建圈资格')
+    } catch (err: any) {
+      setPlatformMsg(err?.message ?? '操作失败')
+    }
+    setTimeout(() => setPlatformMsg(''), 2500)
+  }
 
   const handleSave = async () => {
     if (!user) return
@@ -131,6 +154,55 @@ export default function SettingsPage() {
         </div>
       </Card>
       </div>
+
+      {/* 平台管理 — 仅超管可见 */}
+      {isSuper && (
+        <div className="mt-10 animate-fade-up" style={{ animationDelay: '160ms' }}>
+          <Card eyebrow="Platform Admin" title="平台管理">
+            <p className="text-sm text-text-muted mb-5">
+              被授予「建圈资格」的用户可以创建自己的圈子。圈子内的管理操作由圈主负责。
+            </p>
+            {platformMsg && (
+              <div className="mb-4 px-4 py-2.5 rounded-lg bg-accent-dim border border-accent/25 text-accent-deep text-sm animate-fade-in">{platformMsg}</div>
+            )}
+            <div className="divide-y divide-hairline">
+              {allProfiles?.map(p => {
+                const isMe = p.id === user?.id
+                return (
+                  <div key={p.id} className="flex items-center gap-4 py-3.5">
+                    <div className="w-10 h-10 rounded-full bg-bg-hover ring-1 ring-hairline flex items-center justify-center shrink-0">
+                      {p.avatar_url && !p.avatar_url.startsWith('http') ? (
+                        <span className="text-lg leading-none">{p.avatar_url}</span>
+                      ) : (
+                        <span className="text-accent-deep font-medium">{(p.nickname || '?').slice(0, 1)}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-medium truncate">
+                        {p.nickname}
+                        {isMe && <span className="text-text-muted ml-2 text-sm font-normal">(我)</span>}
+                      </p>
+                    </div>
+                    {p.platform_role === 'super' ? (
+                      <span className="px-2.5 py-1 rounded-lg text-xs bg-blush-dim text-blush-deep font-medium shrink-0">超管</span>
+                    ) : isMe ? (
+                      <span className="text-xs text-text-muted shrink-0">不能修改自己</span>
+                    ) : (
+                      <div className="flex items-center gap-2 shrink-0">
+                        {p.platform_role === 'creator' ? (
+                          <Button variant="ghost" size="sm" onClick={() => handleToggleCreator(p.id, null)}>取消资格</Button>
+                        ) : (
+                          <Button variant="secondary" size="sm" onClick={() => handleToggleCreator(p.id, 'creator')}>授予建圈资格</Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

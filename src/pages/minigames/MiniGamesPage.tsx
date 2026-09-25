@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useAuthStore } from '@/stores/authStore'
+import { useCircleStore, isCircleAdmin } from '@/stores/circleStore'
 import { useRealtime } from '@/hooks/useRealtime'
 import TicTacToeBoard from '@/components/games/TicTacToeBoard'
 import GomokuBoard from '@/components/games/GomokuBoard'
@@ -10,6 +11,7 @@ import {
   getGameSessions,
   createGameSession,
   updateGameSession,
+  deleteGameSession,
   type GameSession,
 } from '@/lib/services'
 import { tttResult, gomokuResult } from '@/lib/games'
@@ -38,16 +40,20 @@ function SessionRow({
   s,
   userId,
   busy,
+  canDelete,
   onOpen,
   onJoin,
   onCancel,
+  onDelete,
 }: {
   s: GameSession
   userId: string
   busy: boolean
+  canDelete: boolean
   onOpen: () => void
   onJoin: () => void
   onCancel: () => void
+  onDelete?: () => void
 }) {
   const isMine = s.creator_id === userId || s.opponent_id === userId
   return (
@@ -69,6 +75,19 @@ function SessionRow({
       )}
       {s.status === 'waiting' && s.creator_id === userId && (
         <Button size="sm" variant="ghost" onClick={onCancel} disabled={busy}>取消</Button>
+      )}
+      {canDelete && onDelete && (
+        <button
+          onClick={onDelete}
+          disabled={busy}
+          title="删除对局"
+          aria-label="删除对局"
+          className="p-2 rounded-lg text-text-muted hover:text-danger hover:bg-danger-dim transition-colors cursor-pointer disabled:opacity-50"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+        </button>
       )}
     </div>
   )
@@ -193,18 +212,20 @@ function GameView({
 
 export default function MiniGamesPage() {
   const { user } = useAuthStore()
+  const currentId = useCircleStore(s => s.currentId)
   const queryClient = useQueryClient()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
   useRealtime('game_sessions', '*', () => {
-    queryClient.invalidateQueries({ queryKey: ['game-sessions'] })
+    queryClient.invalidateQueries({ queryKey: ['game-sessions', currentId] })
   })
 
   const { data: sessions, isLoading } = useQuery({
-    queryKey: ['game-sessions'],
-    queryFn: getGameSessions,
+    queryKey: ['game-sessions', currentId],
+    queryFn: () => getGameSessions(currentId!),
+    enabled: !!currentId,
   })
 
   const guard = async (fn: () => Promise<void>) => {
@@ -214,7 +235,7 @@ export default function MiniGamesPage() {
       await fn()
       // 写操作后强制刷新到拿到最新状态再解除 busy，
       // 关闭 realtime 回传前的双击连走/陈旧视图窗口
-      await queryClient.refetchQueries({ queryKey: ['game-sessions'] })
+      await queryClient.refetchQueries({ queryKey: ['game-sessions', currentId] })
     } catch (err: any) {
       setError(err.message ?? '操作失败')
     } finally {
@@ -224,11 +245,18 @@ export default function MiniGamesPage() {
 
   const create = (kind: GameSession['kind']) =>
     guard(async () => {
-      const s = await createGameSession(kind)
+      const s = await createGameSession(currentId!, kind)
       setActiveId(s.id)
     })
 
   const active = activeId ? sessions?.find(s => s.id === activeId) : undefined
+
+  const admin = isCircleAdmin()
+  const handleDelete = (s: GameSession) =>
+    guard(async () => {
+      await deleteGameSession(s.id)
+      if (activeId === s.id) setActiveId(null)
+    })
 
   const open = (sessions ?? []).filter(s => s.status === 'waiting' || s.status === 'playing')
   const history = (sessions ?? []).filter(s => s.status === 'done' || s.status === 'cancelled').slice(0, 8)
@@ -273,6 +301,7 @@ export default function MiniGamesPage() {
                     s={s}
                     userId={user!.id}
                     busy={busy}
+                    canDelete={admin}
                     onOpen={() => setActiveId(s.id)}
                     onJoin={() => guard(async () => {
                       await updateGameSession(s.id, { opponent_id: user!.id, status: 'playing', turn_user_id: s.creator_id })
@@ -281,6 +310,9 @@ export default function MiniGamesPage() {
                     onCancel={() => guard(async () => {
                       await updateGameSession(s.id, { status: 'cancelled' })
                     })}
+                    onDelete={() => {
+                      if (window.confirm('确定删除这场对局？')) handleDelete(s)
+                    }}
                   />
                 ))}
               </div>
@@ -298,9 +330,13 @@ export default function MiniGamesPage() {
                     s={s}
                     userId={user!.id}
                     busy={busy}
+                    canDelete={admin}
                     onOpen={() => setActiveId(s.id)}
                     onJoin={() => {}}
                     onCancel={() => {}}
+                    onDelete={() => {
+                      if (window.confirm('确定删除这场对局？')) handleDelete(s)
+                    }}
                   />
                 ))}
               </div>

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
+import { useCircleStore } from './circleStore'
 
 interface AuthState {
   user: User | null
@@ -46,6 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
+    useCircleStore.getState().reset()
     set({ user: null, session: null })
   },
 
